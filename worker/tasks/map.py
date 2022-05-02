@@ -26,10 +26,10 @@ def which_bucket(word, n_buckets):
 
 
 def word_count_map(
-    input_file_path, output_file_path, sort=False, n_buckets=1
+    input_file_path, output_file_path, ignore_case=True, sort=False, n_buckets=1
 ):
     raw_lines = make_text_generator(input_file_path)
-    tokenized_text = tokenize_lines(raw_lines)
+    tokenized_text = tokenize_lines(raw_lines, ignore_case)
     if sort:
         tokenized_text = sorted(tokenized_text)
     write_output(tokenized_text, output_file_path, n_buckets)
