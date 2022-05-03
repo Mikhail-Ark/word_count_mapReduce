@@ -1,7 +1,6 @@
 import os
 from unittest import TestCase, main
 
-
 from worker.tasks.map import tokenize, tokenize_lines, word_count_map
 
 
@@ -53,21 +52,26 @@ class TestMethodsWithFiles(TestCase):
     intermediate_path = "./files/intermediate/"
     output_path = "./files/out/"
 
-    
-    def setUp(self):
-        self.clear_dirs()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.clear_dirs()
 
 
-    def tearDown(self):
-        self.clear_dirs()
-
-
-    def clear_dirs(self):
-        paths = [self.intermediate_path, self.output_path]
+    @staticmethod
+    def clear_dirs():
+        paths = [
+            TestMethodsWithFiles.intermediate_path,
+            TestMethodsWithFiles.output_path
+        ]
         for path in paths:
             for file in os.listdir(path):
                 if file.startswith("test"):
                     os.remove(path + file)
+
+
+    def tearDown(self):
+        self.clear_dirs()
 
 
     def test_unit_word_count_map_single(self):
