@@ -70,6 +70,9 @@ def write_output(words, output_file_path, n_buckets=None):
         file = files[bucket]
         file.write(word)
         file.write("\n")
+    if n_buckets is None and files[0] is None:
+        file = open(output_file_path, "w")
+        file.close()
     for file in files:
         if file is not None:
             file.close()
