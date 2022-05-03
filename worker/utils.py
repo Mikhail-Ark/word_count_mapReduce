@@ -1,5 +1,4 @@
 from itertools import chain
-from os import stat
 
 
 def make_text_generator(input_file_path, merge_sort=False):
@@ -30,11 +29,8 @@ def make_text_generator_merge_sort(input_files_paths):
         return make_text_generator_single(input_files_paths[0])
     
     files = [open(file_path, "r") for file_path in input_files_paths]
-    active_files = [
-        i for i in range(len(input_files_paths)) \
-        if stat(input_files_paths[i]).st_size != 0
-    ]
     current_words = [file.readline().rstrip("\n") for file in files]
+    active_files = list(range(len(input_files_paths)))
     inactivate = list()
 
     while active_files:

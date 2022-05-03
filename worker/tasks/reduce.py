@@ -1,5 +1,5 @@
 from collections import Counter
-from os import listdir
+from os import listdir, stat
 
 from worker.utils import make_text_generator, write_output
 
@@ -15,7 +15,8 @@ def find_files_to_reduce(input_path, job_id=0):
     file_name_ending = f"-{job_id}"
     return [
         input_path + file_name for file_name in listdir(input_path)
-        if file_name.endswith(file_name_ending)
+        if file_name.endswith(file_name_ending) and
+        stat(input_path + file_name).st_size != 0
     ]
 
 
