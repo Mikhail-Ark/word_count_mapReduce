@@ -1,14 +1,16 @@
 from itertools import chain
+from os import stat
 
 
 def make_text_generator(input_file_path, merge_sort=False):
-    assert not merge_sort, "merge_sort is not implemented"
     if isinstance(input_file_path, str):
         return make_text_generator_single(input_file_path)
 
     elif isinstance(input_file_path, list):
         assert all(isinstance(x, str) for x in input_file_path), \
-        "file path should be str"
+                "file path should be str"
+        if merge_sort:
+            return make_text_generator_merge_sort(input_file_path)
         return chain(
             make_text_generator_single(file_path) \
             for file_path in input_file_path
@@ -21,6 +23,36 @@ def make_text_generator_single(input_file_path):
     with open(input_file_path, "r") as file:
         for line in file:
             yield line
+
+
+def make_text_generator_merge_sort(input_files_paths):
+    if len(input_files_paths) == 1:
+        return make_text_generator_single(input_files_paths[0])
+    
+    files = [open(file_path, "r") for file_path in input_files_paths]
+    active_files = [
+        i for i in range(len(input_files_paths)) \
+        if stat(input_files_paths[i]).st_size != 0
+    ]
+    current_words = [file.readline().rstrip("\n") for file in files]
+    inactivate = list()
+
+    while active_files:
+        min_word = min(current_words[i] for i in active_files)
+        for i in active_files:
+            current_word = current_words[i]
+            file = files[i]
+            while current_word == min_word:
+                yield current_word
+                current_word = file.readline().rstrip("\n")
+                if not current_word:
+                    file.close()
+                    inactivate.append(i)
+                    break
+                current_words[i] = current_word
+        for i in inactivate:
+            active_files.remove(i)
+        inactivate.clear()
 
 
 def write_output(words, output_file_path, n_buckets=None):
