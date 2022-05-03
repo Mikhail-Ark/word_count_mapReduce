@@ -1,24 +1,6 @@
 from re import findall
 
-from worker.utils import make_text_generator
-
-
-def write_output(words, output_file_path, n_buckets=1):
-    files = [None] * n_buckets
-    for word in words:
-        bucket = which_bucket(word, n_buckets)
-        if files[bucket] is None:
-            files[bucket] = open(f"{output_file_path}-{bucket}", "w")
-        file = files[bucket]
-        file.write(word)
-        file.write("\n")
-    for file in files:
-        if file is not None:
-            file.close()
-
-
-def which_bucket(word, n_buckets):
-    return ord(word[0]) % n_buckets
+from worker.utils import make_text_generator, write_output
 
 
 def word_count_map(
