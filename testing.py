@@ -2,6 +2,7 @@ import os
 from unittest import TestCase, main
 
 from worker.tasks.map import tokenize, tokenize_lines, word_count_map
+from worker.tasks.reduce import count, word_count_reduce
 
 
 class TestMethodsSimple(TestCase):
@@ -45,6 +46,40 @@ class TestMethodsSimple(TestCase):
         res = list(tokenize_lines(lines, ignore_case=False))
         expected_res = ["Hello", "world", "Nice", "to", "see", "you", "world"]
         self.assertEqual(res, expected_res)
+
+
+    def test_unit_count(self):
+        words = (
+            w for w in ["Hello", "world", "Nice", "to", "see", "you", "world"]
+        )
+        res = set(count(words, sorted=False))
+        expected_res = {
+            ('Hello', 1), ('world', 2), ('Nice', 1),
+            ('to', 1), ('see', 1), ('you', 1)
+        }
+        self.assertEqual(res, expected_res)
+
+
+    def test_unit_count_sorted(self):
+        pass
+
+
+    def test_unit_count_unsorted(self):
+        words = (
+            w for w in ["Hello", "world", "Nice", "to", "see", "you", "world"]
+        )
+        res = count(words, sorted=True)
+        self.assertRaises(AssertionError, list, res)
+
+
+
+
+    def test_unit_count_empty(self):
+        pass
+
+
+    def test_unit_count_sorted_empty(self):
+        pass
 
 
 class TestMethodsWithFiles(TestCase):
