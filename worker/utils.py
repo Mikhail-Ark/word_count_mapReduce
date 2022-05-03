@@ -1,4 +1,4 @@
-from itertools import chain
+from os import stat
 
 
 def make_text_generator(input_file_path, merge_sort=False):
@@ -81,3 +81,7 @@ def which_bucket(word, n_buckets):
     if n_buckets is None:
         return 0
     return ord(word[0]) % n_buckets
+
+
+def is_empty_file(file_path):
+    return stat(file_path).st_size == 0

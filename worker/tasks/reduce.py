@@ -1,7 +1,7 @@
 from collections import Counter
-from os import listdir, stat
+from os import listdir
 
-from worker.utils import make_text_generator, write_output
+from worker.utils import is_empty_file, make_text_generator, write_output
 
 
 def word_count_reduce(input_path, output_path, job_id, merge_sort=False):
@@ -16,7 +16,7 @@ def find_files_to_reduce(input_path, job_id=0):
     return [
         input_path + file_name for file_name in listdir(input_path)
         if file_name.endswith(file_name_ending) and
-        stat(input_path + file_name).st_size != 0
+        not is_empty_file(input_path + file_name)
     ]
 
 
