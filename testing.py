@@ -1,9 +1,9 @@
-import os
+from os import listdir, path, remove
 from unittest import TestCase, main
 
 from worker.tasks.map import tokenize, tokenize_lines, word_count_map
 from worker.tasks.reduce import count, find_files_to_reduce, word_count_reduce
-from worker.utils import make_text_generator_merge_sort
+from worker.utils import is_empty_file, make_text_generator_merge_sort
 
 INPUT_PATH = "./files/inputs/testing/"
 INTERMEDIATE_PATH = "./files/intermediate/testing/"
@@ -135,9 +135,9 @@ class TestMethodsOutputFiles(TestCase):
             OUTPUT_PATH
         ]
         for path in paths:
-            for file in os.listdir(path):
+            for file in listdir(path):
                 if file.startswith("_test"):
-                    os.remove(path + file)
+                    remove(path + file)
 
 
     def tearDown(self):
@@ -162,7 +162,7 @@ class TestMethodsOutputFiles(TestCase):
         word_count_map(
             input_file_path, output_file_path, n_buckets=1
         )
-        self.assertFalse(os.path.isfile(output_file_path + "-0"))
+        self.assertFalse(path.isfile(output_file_path + "-0"))
 
 
     def test_functional_word_count_map_small(self):
@@ -232,7 +232,7 @@ usually\nvery\nvery\nwhy\n"""
         )
         expected_res = "hello\n"
         test_files = [
-            f for f in os.listdir(INTERMEDIATE_PATH) \
+            f for f in listdir(INTERMEDIATE_PATH) \
             if f.startswith("_test")
         ]
         self.assertEqual(len(test_files), 1)
@@ -248,7 +248,7 @@ usually\nvery\nvery\nwhy\n"""
             input_file_path, output_file_path, n_buckets=5
         )
         test_files = [
-            f for f in os.listdir(INTERMEDIATE_PATH) \
+            f for f in listdir(INTERMEDIATE_PATH) \
             if f.startswith("_test")
         ]
         self.assertEqual(len(test_files), 0)
@@ -269,7 +269,7 @@ usually\nvery\nvery\nwhy\n"""
         ]
         test_files = [
             f"{INTERMEDIATE_PATH}{file}" for file in \
-            os.listdir(INTERMEDIATE_PATH) if file.startswith("_test")
+            listdir(INTERMEDIATE_PATH) if file.startswith("_test")
         ]
         test_files.sort()
         res = list()
@@ -294,7 +294,7 @@ usually\nvery\nvery\nwhy\n"""
         ]
         test_files = [
             f"{INTERMEDIATE_PATH}{file}" for file in \
-            os.listdir(INTERMEDIATE_PATH) if file.startswith("_test")
+            listdir(INTERMEDIATE_PATH) if file.startswith("_test")
         ]
         test_files.sort()
         res = list()
@@ -304,20 +304,113 @@ usually\nvery\nvery\nwhy\n"""
         self.assertEqual(res, expected_res)
 
 
-    def test_functional_word_count_reduce(self):
-        pass
+    def test_functional_word_count_reduce_single(self):
+        job_id = 0
+        word_count_reduce(
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+        )
+        with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+            res = file.read()
+        expected_res = "hello 1\n"
+        self.assertEqual(res, expected_res)
 
 
-    def test_functional_word_count_reduce(self):
-        pass
+    def test_functional_word_count_reduce_empty(self):
+        job_id = 999
+        word_count_reduce(
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+        )
+        output_file_path = f"{OUTPUT_PATH}_test-{job_id}"
+        self.assertTrue(path.isfile(output_file_path))
+        self.assertTrue(is_empty_file(output_file_path))
 
 
-    def test_functional_word_count_reduce(self):
-        pass
+    def test_functional_word_count_reduce_small(self):
+        job_id = 1
+        word_count_reduce(
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+        )
+        with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+            res = set(file.read().split("\n"))
+        expected_res = {
+            '', 'a 1', 'about 1', 'accepted 1', 'algernon 1', 'all 1',
+            'anything 1', 'be 2', 'believe 1', 'but 1', 'certainly 1',
+            'definite 1', 'don 1', 'essence 1', 'ever 1', 'excitement 1',
+            'fact 1', 'forget 1', 'get 1', 'i 4', 'if 1', 'in 2', 'is 5',
+            'it 1', 'll 1', 'love 1', 'married 1', 'may 1', 'nothing 1',
+            'of 1', 'one 2', 'over 1', 'proposal 1', 'proposing 1', 'really 1',
+            'romance 1', 'romantic 3', 'see 1', 't 1', 'the 3', 'then 1',
+            'there 1', 'to 2', 'try 1', 'uncertainty 1', 'usually 1', 'very 2',
+            'why 1'
+        }
+        self.assertEqual(res, expected_res)
 
 
-    def test_functional_word_count_reduce(self):
-        pass
+    def test_functional_word_count_reduce_small_sorted(self):
+        job_id = 2
+        word_count_reduce(
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=True
+        )
+        with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+            res = file.read()
+        expected_res = """a 1\nabout 1\naccepted 1\nalgernon 1\nall 1
+anything 1\nbe 2\nbelieve 1\nbut 1\ncertainly 1\ndefinite 1\ndon 1\nessence 1
+ever 1\nexcitement 1\nfact 1\nforget 1\nget 1\ni 4\nif 1\nin 2\nis 5\nit 1\nll 1
+love 1\nmarried 1\nmay 1\nnothing 1\nof 1\none 2\nover 1\nproposal 1
+proposing 1\nreally 1\nromance 1\nromantic 3\nsee 1\nt 1\nthe 3\nthen 1\nthere 1
+to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
+        self.assertEqual(res, expected_res)
+
+
+    def test_functional_word_count_reduce_usual(self):
+        job_id = 3
+        word_count_reduce(
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+        )
+        with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+            res = file.read()
+        self.assertEqual(len(res), 30377)
+        self.assertEqual(len(res.split("\n")), 3058)
+
+
+    def test_functional_word_count_reduce_small_bubkets(self):
+        job_id = 0
+        word_count_reduce(
+            INTERMEDIATE_PATH + "small_buckets/", OUTPUT_PATH + "_test",
+            job_id, merge_sort=False
+        )
+        with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+            res = set(file.read().split("\n"))
+        expected_res = {
+            '', 'a 1', 'about 1', 'accepted 1', 'algernon 1', 'all 1',
+            'anything 1', 'be 2', 'believe 1', 'but 1', 'certainly 1',
+            'definite 1', 'don 1', 'essence 1', 'ever 1', 'excitement 1',
+            'fact 1', 'forget 1', 'get 1', 'i 4', 'if 1', 'in 2', 'is 5',
+            'it 1', 'll 1', 'love 1', 'married 1', 'may 1', 'nothing 1',
+            'of 1', 'one 2', 'over 1', 'proposal 1', 'proposing 1', 'really 1',
+            'romance 1', 'romantic 3', 'see 1', 't 1', 'the 3', 'then 1',
+            'there 1', 'to 2', 'try 1', 'uncertainty 1', 'usually 1', 'very 2',
+            'why 1'
+        }
+        self.assertEqual(res, expected_res)
+
+
+    def test_functional_word_count_reduce_small_bubkets_sorted(self):
+        job_id = 0
+        word_count_reduce(
+            INTERMEDIATE_PATH + "small_buckets_sorted/", OUTPUT_PATH + "_test",
+            job_id, merge_sort=True
+        )
+        with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+            res = file.read()
+        expected_res = """a 1\nabout 1\naccepted 1\nalgernon 1\nall 1
+anything 1\nbe 2\nbelieve 1\nbut 1\ncertainly 1\ndefinite 1\ndon 1\nessence 1
+ever 1\nexcitement 1\nfact 1\nforget 1\nget 1\ni 4\nif 1\nin 2\nis 5\nit 1\nll 1
+love 1\nmarried 1\nmay 1\nnothing 1\nof 1\none 2\nover 1\nproposal 1
+proposing 1\nreally 1\nromance 1\nromantic 3\nsee 1\nt 1\nthe 3\nthen 1\nthere 1
+to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
+        self.assertEqual(res, expected_res)
+
 
 if __name__ == "__main__":
     main()
