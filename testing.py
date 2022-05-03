@@ -97,9 +97,9 @@ class TestMethodsSimple(TestCase):
 
 
 class TestMethodsWithFiles(TestCase):
-    input_path = "./files/inputs/"
-    intermediate_path = "./files/intermediate/"
-    output_path = "./files/out/"
+    input_path = "./files/inputs/testing/"
+    intermediate_path = "./files/intermediate/testing/"
+    output_path = "./files/out/testing/"
 
 
     @classmethod
@@ -115,7 +115,7 @@ class TestMethodsWithFiles(TestCase):
         ]
         for path in paths:
             for file in os.listdir(path):
-                if file.startswith("test"):
+                if file.startswith("_test"):
                     os.remove(path + file)
 
 
@@ -125,7 +125,7 @@ class TestMethodsWithFiles(TestCase):
 
     def test_functional_word_count_map_single(self):
         input_file_path = self.input_path + "test_single.txt"
-        output_file_path = self.intermediate_path + "test-single"
+        output_file_path = self.intermediate_path + "_test-single"
         word_count_map(
             input_file_path, output_file_path, n_buckets=1
         )
@@ -137,7 +137,7 @@ class TestMethodsWithFiles(TestCase):
 
     def test_functional_word_count_map_empty(self):
         input_file_path = self.input_path + "test_empty.txt"
-        output_file_path = self.intermediate_path + "test-empty"
+        output_file_path = self.intermediate_path + "_test-empty"
         word_count_map(
             input_file_path, output_file_path, n_buckets=1
         )
@@ -146,7 +146,7 @@ class TestMethodsWithFiles(TestCase):
 
     def test_functional_word_count_map_small(self):
         input_file_path = self.input_path + "test_small.txt"
-        output_file_path = self.intermediate_path + "test-small"
+        output_file_path = self.intermediate_path + "_test-small"
         word_count_map(
             input_file_path, output_file_path, n_buckets=1
         )
@@ -163,7 +163,7 @@ certainly\ntry\nto\nforget\nthe\nfact\n"""
 
     def test_functional_word_count_map_sort(self):
         input_file_path = self.input_path + "test_small.txt"
-        output_file_path = self.intermediate_path + "test-small"
+        output_file_path = self.intermediate_path + "_test-small"
         word_count_map(
             input_file_path, output_file_path, sort=True, n_buckets=1
         )
@@ -180,7 +180,7 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_case(self):
         input_file_path = self.input_path + "test_small.txt"
-        output_file_path = self.intermediate_path + "test-small"
+        output_file_path = self.intermediate_path + "_test-small"
         word_count_map(
             input_file_path, output_file_path, ignore_case=False, n_buckets=1
         )
@@ -191,7 +191,7 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_usual(self):
         input_file_path = self.input_path + "test_usual.txt"
-        output_file_path = self.intermediate_path + "test-usual"
+        output_file_path = self.intermediate_path + "_test-usual"
         word_count_map(
             input_file_path, output_file_path, n_buckets=1
         )
@@ -205,13 +205,14 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_buckets_single(self):
         input_file_path = self.input_path + "test_single.txt"
-        output_file_path = self.intermediate_path + "test-single"
+        output_file_path = self.intermediate_path + "_test-single"
         word_count_map(
             input_file_path, output_file_path, n_buckets=5
         )
         expected_res = "hello\n"
         test_files = [
-            f for f in os.listdir(self.intermediate_path) if f.startswith("test")
+            f for f in os.listdir(self.intermediate_path) \
+            if f.startswith("_test")
         ]
         self.assertEqual(len(test_files), 1)
         with open(f"{self.intermediate_path}{test_files[0]}", "r") as file:
@@ -221,19 +222,20 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_buckets_empty(self):
         input_file_path = self.input_path + "test_empty.txt"
-        output_file_path = self.intermediate_path + "test-empty"
+        output_file_path = self.intermediate_path + "_test-empty"
         word_count_map(
             input_file_path, output_file_path, n_buckets=5
         )
         test_files = [
-            f for f in os.listdir(self.intermediate_path) if f.startswith("test")
+            f for f in os.listdir(self.intermediate_path) \
+            if f.startswith("_test")
         ]
         self.assertEqual(len(test_files), 0)
 
 
     def test_functional_word_count_map_buckets_small(self):
         input_file_path = self.input_path + "test_small.txt"
-        output_file_path = self.intermediate_path + "test-small"
+        output_file_path = self.intermediate_path + "_test-small"
         word_count_map(
             input_file_path, output_file_path, n_buckets=5
         )
@@ -246,7 +248,7 @@ usually\nvery\nvery\nwhy\n"""
         ]
         test_files = [
             f"{self.intermediate_path}{file}" for file in \
-            os.listdir(self.intermediate_path) if file.startswith("test")
+            os.listdir(self.intermediate_path) if file.startswith("_test")
         ]
         test_files.sort()
         res = list()
@@ -255,6 +257,47 @@ usually\nvery\nvery\nwhy\n"""
                 res.append(file.read())
         self.assertEqual(res, expected_res)
 
+
+    def test_functional_word_count_map_buckets_sort(self):
+        input_file_path = self.input_path + "test_small.txt"
+        output_file_path = self.intermediate_path + "_test-small"
+        word_count_map(
+            input_file_path, output_file_path, sort=True, n_buckets=5
+        )
+        expected_res = [
+            "definite\ndon\ni\ni\ni\ni\nif\nin\nin\nis\nis\nis\nis\nis\nit\nnothing\nsee\n",
+            "essence\never\nexcitement\nof\none\none\nover\nt\nthe\nthe\nthe\nthen\nthere\nto\nto\ntry\n",
+            "a\nabout\naccepted\nalgernon\nall\nanything\nfact\nforget\nproposal\nproposing\nuncertainty\nusually\n",
+            "be\nbe\nbelieve\nbut\nget\nll\nlove\nvery\nvery\n",
+            "certainly\nmarried\nmay\nreally\nromance\nromantic\nromantic\nromantic\nwhy\n"
+        ]
+        test_files = [
+            f"{self.intermediate_path}{file}" for file in \
+            os.listdir(self.intermediate_path) if file.startswith("_test")
+        ]
+        test_files.sort()
+        res = list()
+        for file_path in test_files:
+            with open(file_path, "r") as file:
+                res.append(file.read())
+        self.assertEqual(res, expected_res)
+
+
+
+    def test_functional_word_count_reduce(self):
+        pass
+
+
+    def test_functional_word_count_reduce(self):
+        pass
+
+
+    def test_functional_word_count_reduce(self):
+        pass
+
+
+    def test_functional_word_count_reduce(self):
+        pass
 
 if __name__ == "__main__":
     main()
