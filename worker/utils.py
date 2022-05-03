@@ -3,25 +3,28 @@ from itertools import chain
 
 def make_text_generator(input_file_path, merge_sort=False):
     if isinstance(input_file_path, str):
-        return make_text_generator_single(input_file_path)
+        generator = make_text_generator_single(input_file_path)
 
     elif isinstance(input_file_path, list):
         assert all(isinstance(x, str) for x in input_file_path), \
                 "file path should be str"
         if merge_sort:
-            return make_text_generator_merge_sort(input_file_path)
-        return chain(
-            make_text_generator_single(file_path) \
-            for file_path in input_file_path
-        )
+            generator = make_text_generator_merge_sort(input_file_path)
+        else:
+            generator = (
+                x for file_path in input_file_path \
+                for x in make_text_generator_single(file_path)
+            )
     else:
         raise AssertionError("unknown path obj type")
+    for word in generator:
+        yield word
 
 
 def make_text_generator_single(input_file_path):
     with open(input_file_path, "r") as file:
         for line in file:
-            yield line
+            yield line.rstrip("\n")
 
 
 def make_text_generator_merge_sort(input_files_paths):
