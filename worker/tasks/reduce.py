@@ -32,6 +32,8 @@ def count(words, sorted=False):
             if word == current_word:
                 n += 1
             else:
+                assert word > current_word, \
+                        "using flag sorted=True input should be sorted"
                 yield (current_word, n)
                 current_word = word
                 n = 1
@@ -39,7 +41,8 @@ def count(words, sorted=False):
 
     else:
         counter = Counter(words)
-        return (item for item in counter.items())
+        for item in counter.items():
+            yield item
 
 
 def items_to_str(items):
