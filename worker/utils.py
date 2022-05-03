@@ -29,8 +29,10 @@ def make_text_generator_single(input_file_path):
 
 def make_text_generator_merge_sort(input_files_paths):
     if len(input_files_paths) == 1:
-        return make_text_generator_single(input_files_paths[0])
-    
+        for word in make_text_generator_single(input_files_paths[0]):
+            yield word
+        return
+
     files = [open(file_path, "r") for file_path in input_files_paths]
     current_words = [file.readline().rstrip("\n") for file in files]
     active_files = list(range(len(input_files_paths)))
