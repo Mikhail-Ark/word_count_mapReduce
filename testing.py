@@ -101,6 +101,25 @@ class TestMethodsSimple(TestCase):
         self.assertEqual(res, expected_res)
 
 
+    def test_unit_find_files_to_reduce(self):
+        res = set(
+            find_files_to_reduce(INTERMEDIATE_PATH, job_id=9)
+        )
+        expected_res = {
+            f"{INTERMEDIATE_PATH}test-merge-sort-{i}-9" for i in (0, 1, 3)
+        }
+        self.assertEqual(res, expected_res)
+
+
+    def test_unit_make_text_generator_merge_sort(self):
+        file_list = find_files_to_reduce(INTERMEDIATE_PATH, job_id=9)
+        res = list(make_text_generator_merge_sort(file_list))
+        expected_res = [
+            'aa', 'aaa', 'bbb', 'ccc', 'ccc', 'ccc',
+            'ccc','ddd', 'ddd', 'eee', 'eee'
+        ]
+        self.assertEqual(res, expected_res)
+
 
 class TestMethodsOutputFiles(TestCase):
 
