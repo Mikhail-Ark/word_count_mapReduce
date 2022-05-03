@@ -47,4 +47,5 @@ def count(words, sorted=False):
 
 
 def items_to_str(items):
-    return (f"{word} {n}" for word, n in items)
+    for word, n in items:
+        yield f"{word} {n}"
