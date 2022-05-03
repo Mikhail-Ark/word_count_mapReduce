@@ -1,10 +1,6 @@
 from re import findall
 
-
-def make_text_generator(input_fp):
-    with open(input_fp, "r") as file:
-        for line in file:
-            yield line
+from worker.utils import make_text_generator
 
 
 def write_output(words, output_file_path, n_buckets=1):
