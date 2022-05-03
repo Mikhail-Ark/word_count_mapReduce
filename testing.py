@@ -61,8 +61,18 @@ class TestMethodsSimple(TestCase):
 
 
     def test_unit_count_sorted(self):
-        pass
-
+        words = (
+            w for w in sorted(
+                ["Hello", "world", "Nice", "to", "see", "you", "world"]
+            )
+        )
+        res = set(count(words, sorted=True))
+        expected_res = {
+            ('Hello', 1), ('world', 2), ('Nice', 1),
+            ('to', 1), ('see', 1), ('you', 1)
+        }
+        self.assertEqual(res, expected_res)
+        
 
     def test_unit_count_unsorted(self):
         words = (
@@ -72,14 +82,18 @@ class TestMethodsSimple(TestCase):
         self.assertRaises(AssertionError, list, res)
 
 
-
-
     def test_unit_count_empty(self):
-        pass
+        words = (w for w in [])
+        res = set(count(words, sorted=False))
+        expected_res = set()
+        self.assertEqual(res, expected_res)
 
 
     def test_unit_count_sorted_empty(self):
-        pass
+        words = (w for w in [])
+        res = set(count(words, sorted=True))
+        expected_res = set()
+        self.assertEqual(res, expected_res)
 
 
 class TestMethodsWithFiles(TestCase):
