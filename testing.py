@@ -305,7 +305,7 @@ usually\nvery\nvery\nwhy\n"""
 
 
     def test_functional_word_count_reduce_single(self):
-        job_id = 0
+        job_id = 4
         word_count_reduce(
             INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
         )
@@ -326,7 +326,7 @@ usually\nvery\nvery\nwhy\n"""
 
 
     def test_functional_word_count_reduce_small(self):
-        job_id = 1
+        job_id = 5
         word_count_reduce(
             INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
         )
@@ -410,6 +410,128 @@ love 1\nmarried 1\nmay 1\nnothing 1\nof 1\none 2\nover 1\nproposal 1
 proposing 1\nreally 1\nromance 1\nromantic 3\nsee 1\nt 1\nthe 3\nthen 1\nthere 1
 to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         self.assertEqual(res, expected_res)
+
+
+    def test_functional_map_reduce_small_single_job(self):
+        input_file_path = INPUT_PATH + "test_small.txt"
+        intermediate_path = INTERMEDIATE_PATH + "_test-small"
+        word_count_map(
+            input_file_path, intermediate_path, n_buckets=1
+        )
+        word_count_reduce(
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_sort=False
+        )
+        with open(f"{OUTPUT_PATH}_test-{0}", "r") as file:
+            res = set(file.read().split("\n"))
+        expected_res = {
+            '', 'a 1', 'about 1', 'accepted 1', 'algernon 1', 'all 1',
+            'anything 1', 'be 2', 'believe 1', 'but 1', 'certainly 1',
+            'definite 1', 'don 1', 'essence 1', 'ever 1', 'excitement 1',
+            'fact 1', 'forget 1', 'get 1', 'i 4', 'if 1', 'in 2', 'is 5',
+            'it 1', 'll 1', 'love 1', 'married 1', 'may 1', 'nothing 1',
+            'of 1', 'one 2', 'over 1', 'proposal 1', 'proposing 1', 'really 1',
+            'romance 1', 'romantic 3', 'see 1', 't 1', 'the 3', 'then 1',
+            'there 1', 'to 2', 'try 1', 'uncertainty 1', 'usually 1', 'very 2',
+            'why 1'
+        }
+        self.assertEqual(res, expected_res)
+
+
+    def test_functional_map_reduce_small_single_job(self):
+        input_file_path = INPUT_PATH + "test_small.txt"
+        intermediate_path = INTERMEDIATE_PATH + "_test-small"
+        word_count_map(
+            input_file_path, intermediate_path, n_buckets=1
+        )
+        word_count_reduce(
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_sort=False
+        )
+        with open(f"{OUTPUT_PATH}_test-{0}", "r") as file:
+            res = set(file.read().split("\n"))
+        expected_res = {
+            '', 'a 1', 'about 1', 'accepted 1', 'algernon 1', 'all 1',
+            'anything 1', 'be 2', 'believe 1', 'but 1', 'certainly 1',
+            'definite 1', 'don 1', 'essence 1', 'ever 1', 'excitement 1',
+            'fact 1', 'forget 1', 'get 1', 'i 4', 'if 1', 'in 2', 'is 5',
+            'it 1', 'll 1', 'love 1', 'married 1', 'may 1', 'nothing 1',
+            'of 1', 'one 2', 'over 1', 'proposal 1', 'proposing 1', 'really 1',
+            'romance 1', 'romantic 3', 'see 1', 't 1', 'the 3', 'then 1',
+            'there 1', 'to 2', 'try 1', 'uncertainty 1', 'usually 1', 'very 2',
+            'why 1'
+        }
+        self.assertEqual(res, expected_res)
+
+
+    def test_functional_map_reduce_usual_multiple_jobs(self):
+        input_file_path = INPUT_PATH + "test_usual.txt"
+        intermediate_path = INTERMEDIATE_PATH + "_test-usual"
+        n_jobs = 2
+        word_count_map(
+            input_file_path, intermediate_path, n_buckets=n_jobs
+        )
+        res = set()
+        for job_id in range(n_jobs):
+            word_count_reduce(
+                INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
+                job_id=job_id, merge_sort=False
+            )
+            with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+                res.update(set(file.read().split("\n")))
+        self.assertEqual(len(res), 3058)
+        self.assertTrue("diary 14" in res)
+        self.assertTrue("algernon 271" in res)
+
+
+    def test_functional_map_reduce_both_multiple_jobs(self):
+        input_file_paths = [
+            INPUT_PATH + "test_usual.txt",
+            INPUT_PATH + "test_small.txt",
+        ]
+        intermediate_path = INTERMEDIATE_PATH + "_test-usual"
+        n_jobs = 2
+        for job_id in range(n_jobs):
+            word_count_map(
+                input_file_paths[job_id], intermediate_path,
+                job_id=job_id, n_buckets=n_jobs
+            )
+        res = set()
+        for job_id in range(n_jobs):
+            word_count_reduce(
+                INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
+                job_id=job_id, merge_sort=False
+            )
+            with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+                res.update(set(file.read().split("\n")))
+        self.assertEqual(len(res), 3058)
+        self.assertTrue("diary 14" in res)
+        self.assertTrue("algernon 272" in res)
+
+
+    def test_functional_map_reduce_both_multiple_jobs_sorted(self):
+        input_file_paths = [
+            INPUT_PATH + "test_usual.txt",
+            INPUT_PATH + "test_small.txt",
+        ]
+        intermediate_path = INTERMEDIATE_PATH + "_test-usual"
+        n_jobs = 2
+        for job_id in range(n_jobs):
+            word_count_map(
+                input_file_paths[job_id], intermediate_path,
+                job_id=job_id, sort=True, n_buckets=n_jobs
+            )
+        res = set()
+        for job_id in range(n_jobs):
+            word_count_reduce(
+                INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
+                job_id=job_id, merge_sort=True
+            )
+            with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
+                contents = file.read().split("\n")
+            self.assertEqual(contents[:-1], sorted(contents[:-1]))
+            res.update(set(contents))
+        self.assertEqual(len(res), 3058)
+        self.assertTrue("diary 14" in res)
+        self.assertTrue("algernon 272" in res)
 
 
 if __name__ == "__main__":
