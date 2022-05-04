@@ -3,7 +3,7 @@ from unittest import TestCase, main
 
 from worker.tasks.map import tokenize, tokenize_lines, word_count_map
 from worker.tasks.reduce import count, find_files_to_reduce, word_count_reduce
-from worker.utils import is_empty_file, make_text_generator_merge_sort
+from worker.utils import is_empty_file, make_text_generator_merge_join
 
 INPUT_PATH = "./files/inputs/testing/"
 INTERMEDIATE_PATH = "./files/intermediate/testing/"
@@ -111,9 +111,9 @@ class TestMethodsSimple(TestCase):
         self.assertEqual(res, expected_res)
 
 
-    def test_unit_make_text_generator_merge_sort(self):
+    def test_unit_make_text_generator_merge_join(self):
         file_list = find_files_to_reduce(INTERMEDIATE_PATH, job_id=9)
-        res = list(make_text_generator_merge_sort(file_list))
+        res = list(make_text_generator_merge_join(file_list))
         expected_res = [
             'aa', 'aaa', 'bbb', 'ccc', 'ccc', 'ccc',
             'ccc','ddd', 'ddd', 'eee', 'eee'
@@ -307,7 +307,7 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_single(self):
         job_id = 4
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -318,7 +318,7 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_empty(self):
         job_id = 999
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
         )
         output_file_path = f"{OUTPUT_PATH}_test-{job_id}"
         self.assertTrue(path.isfile(output_file_path))
@@ -328,7 +328,7 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_small(self):
         job_id = 5
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = set(file.read().split("\n"))
@@ -349,7 +349,7 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_small_sorted(self):
         job_id = 2
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=True
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=True
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -365,7 +365,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
     def test_functional_word_count_reduce_usual(self):
         job_id = 3
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_sort=False
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -377,7 +377,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         job_id = 0
         word_count_reduce(
             INTERMEDIATE_PATH + "small_buckets/", OUTPUT_PATH + "_test",
-            job_id, merge_sort=False
+            job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = set(file.read().split("\n"))
@@ -399,7 +399,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         job_id = 0
         word_count_reduce(
             INTERMEDIATE_PATH + "small_buckets_sorted/", OUTPUT_PATH + "_test",
-            job_id, merge_sort=True
+            job_id, merge_join=True
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -419,7 +419,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
             input_file_path, intermediate_path, n_buckets=1
         )
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_sort=False
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{0}", "r") as file:
             res = set(file.read().split("\n"))
@@ -444,7 +444,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
             input_file_path, intermediate_path, n_buckets=1
         )
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_sort=False
+            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{0}", "r") as file:
             res = set(file.read().split("\n"))
@@ -473,7 +473,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         for job_id in range(n_jobs):
             word_count_reduce(
                 INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
-                job_id=job_id, merge_sort=False
+                job_id=job_id, merge_join=False
             )
             with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
                 res.update(set(file.read().split("\n")))
@@ -498,7 +498,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         for job_id in range(n_jobs):
             word_count_reduce(
                 INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
-                job_id=job_id, merge_sort=False
+                job_id=job_id, merge_join=False
             )
             with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
                 res.update(set(file.read().split("\n")))
@@ -523,7 +523,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         for job_id in range(n_jobs):
             word_count_reduce(
                 INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
-                job_id=job_id, merge_sort=True
+                job_id=job_id, merge_join=True
             )
             with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
                 contents = file.read().split("\n")

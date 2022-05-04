@@ -1,15 +1,15 @@
 from os import stat
 
 
-def make_text_generator(input_file_path, merge_sort=False):
+def make_text_generator(input_file_path, merge_join=False):
     if isinstance(input_file_path, str):
         generator = make_text_generator_single(input_file_path)
 
     elif isinstance(input_file_path, list):
         assert all(isinstance(x, str) for x in input_file_path), \
                 "file path should be str"
-        if merge_sort:
-            generator = make_text_generator_merge_sort(input_file_path)
+        if merge_join:
+            generator = make_text_generator_merge_join(input_file_path)
         else:
             generator = (
                 x for file_path in input_file_path \
@@ -27,7 +27,7 @@ def make_text_generator_single(input_file_path):
             yield line.rstrip("\n")
 
 
-def make_text_generator_merge_sort(input_files_paths):
+def make_text_generator_merge_join(input_files_paths):
     if len(input_files_paths) == 1:
         for word in make_text_generator_single(input_files_paths[0]):
             yield word

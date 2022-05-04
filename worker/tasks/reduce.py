@@ -4,10 +4,10 @@ from os import listdir
 from worker.utils import is_empty_file, make_text_generator, write_output
 
 
-def word_count_reduce(input_path, output_path, job_id=0, merge_sort=False):
+def word_count_reduce(input_path, output_path, job_id=0, merge_join=False):
     input_files_paths = find_files_to_reduce(input_path, job_id)
-    words = make_text_generator(input_files_paths, merge_sort)
-    counter_items = count(words, merge_sort)
+    words = make_text_generator(input_files_paths, merge_join)
+    counter_items = count(words, merge_join)
     write_output(items_to_str(counter_items), f"{output_path}-{job_id}")
     
 
@@ -34,7 +34,7 @@ def count(words, sorted=False):
                 n += 1
             else:
                 assert word > current_word, \
-                        "using flag sorted=True input should be sorted"
+                        "using flag merge_join=True: input should be sorted"
                 yield (current_word, n)
                 current_word = word
                 n = 1
