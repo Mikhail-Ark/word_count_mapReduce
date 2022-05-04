@@ -4,7 +4,7 @@ from os import listdir
 from worker.utils import is_empty_file, make_text_generator, write_output
 
 
-def word_count_reduce(input_path, output_path, job_id, merge_sort=False):
+def word_count_reduce(input_path, output_path, job_id=0, merge_sort=False):
     input_files_paths = find_files_to_reduce(input_path, job_id)
     words = make_text_generator(input_files_paths, merge_sort)
     counter_items = count(words, merge_sort)

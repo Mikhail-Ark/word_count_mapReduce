@@ -146,11 +146,11 @@ class TestMethodsOutputFiles(TestCase):
 
     def test_functional_word_count_map_single(self):
         input_file_path = INPUT_PATH + "test_single.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-single"
+        output_path = INTERMEDIATE_PATH + "_test-single"
         word_count_map(
-            input_file_path, output_file_path, n_buckets=1
+            input_file_path, output_path, n_buckets=1
         )
-        with open(output_file_path + "-0", "r") as file:
+        with open(output_path + "-0-0", "r") as file:
             res = file.read()
         expected_res = "hello\n"
         self.assertEqual(res, expected_res)
@@ -167,11 +167,11 @@ class TestMethodsOutputFiles(TestCase):
 
     def test_functional_word_count_map_small(self):
         input_file_path = INPUT_PATH + "test_small.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-small"
+        output_path = INTERMEDIATE_PATH + "_test-small"
         word_count_map(
-            input_file_path, output_file_path, n_buckets=1
+            input_file_path, output_path, n_buckets=1
         )
-        with open(output_file_path + "-0", "r") as file:
+        with open(output_path + "-0-0", "r") as file:
             res = file.read()
         expected_res = """algernon\ni\nreally\ndon\nt\nsee\nanything\nromantic
 in\nproposing\nit\nis\nvery\nromantic\nto\nbe\nin\nlove\nbut\nthere\nis\nnothing
@@ -184,11 +184,11 @@ certainly\ntry\nto\nforget\nthe\nfact\n"""
 
     def test_functional_word_count_map_sort(self):
         input_file_path = INPUT_PATH + "test_small.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-small"
+        output_path = INTERMEDIATE_PATH + "_test-small"
         word_count_map(
-            input_file_path, output_file_path, sort=True, n_buckets=1
+            input_file_path, output_path, sort=True, n_buckets=1
         )
-        with open(output_file_path + "-0", "r") as file:
+        with open(output_path + "-0-0", "r") as file:
             res = file.read()
         expected_res = """a\nabout\naccepted\nalgernon\nall\nanything\nbe\nbe
 believe\nbut\ncertainly\ndefinite\ndon\nessence\never\nexcitement\nfact\nforget
@@ -201,22 +201,22 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_case(self):
         input_file_path = INPUT_PATH + "test_small.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-small"
+        output_path = INTERMEDIATE_PATH + "_test-small"
         word_count_map(
-            input_file_path, output_file_path, ignore_case=False, n_buckets=1
+            input_file_path, output_path, ignore_case=False, n_buckets=1
         )
-        with open(output_file_path + "-0", "r") as file:
+        with open(output_path + "-0-0", "r") as file:
             res = file.read()
         self.assertEqual(sum(c.isupper() for c in res), 12)
 
 
     def test_functional_word_count_map_usual(self):
         input_file_path = INPUT_PATH + "test_usual.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-usual"
+        output_path = INTERMEDIATE_PATH + "_test-usual"
         word_count_map(
-            input_file_path, output_file_path, n_buckets=1
+            input_file_path, output_path, n_buckets=1
         )
-        with open(output_file_path + "-0", "r") as file:
+        with open(output_path + "-0-0", "r") as file:
             res = file.read()
         self.assertEqual(len(res), 129609)
         res_split = res.split()
@@ -226,9 +226,9 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_buckets_single(self):
         input_file_path = INPUT_PATH + "test_single.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-single"
+        output_path = INTERMEDIATE_PATH + "_test-single"
         word_count_map(
-            input_file_path, output_file_path, n_buckets=5
+            input_file_path, output_path, n_buckets=5
         )
         expected_res = "hello\n"
         test_files = [
@@ -243,9 +243,9 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_buckets_empty(self):
         input_file_path = INPUT_PATH + "test_empty.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-empty"
+        output_path = INTERMEDIATE_PATH + "_test-empty"
         word_count_map(
-            input_file_path, output_file_path, n_buckets=5
+            input_file_path, output_path, n_buckets=5
         )
         test_files = [
             f for f in listdir(INTERMEDIATE_PATH) \
@@ -256,9 +256,9 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_buckets_small(self):
         input_file_path = INPUT_PATH + "test_small.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-small"
+        output_path = INTERMEDIATE_PATH + "_test-small"
         word_count_map(
-            input_file_path, output_file_path, n_buckets=5
+            input_file_path, output_path, n_buckets=5
         )
         expected_res = [
             "i\ndon\nsee\nin\nit\nis\nin\nis\nnothing\ndefinite\nis\ni\nis\nis\nif\ni\ni\n",
@@ -281,9 +281,9 @@ usually\nvery\nvery\nwhy\n"""
 
     def test_functional_word_count_map_buckets_sort(self):
         input_file_path = INPUT_PATH + "test_small.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-small"
+        output_path = INTERMEDIATE_PATH + "_test-small"
         word_count_map(
-            input_file_path, output_file_path, sort=True, n_buckets=5
+            input_file_path, output_path, sort=True, n_buckets=5
         )
         expected_res = [
             "definite\ndon\ni\ni\ni\ni\nif\nin\nin\nis\nis\nis\nis\nis\nit\nnothing\nsee\n",

@@ -4,13 +4,14 @@ from worker.utils import make_text_generator, write_output
 
 
 def word_count_map(
-    input_file_path, output_file_path, ignore_case=True, sort=False, n_buckets=1
+    input_file_path, output_path, job_id=0,
+    ignore_case=True, sort=False, n_buckets=1
 ):
     raw_lines = make_text_generator(input_file_path)
     tokenized_text = tokenize_lines(raw_lines, ignore_case)
     if sort:
         tokenized_text = sorted(tokenized_text)
-    write_output(tokenized_text, output_file_path, n_buckets)
+    write_output(tokenized_text, f"{output_path}-{job_id}", n_buckets)
 
 
 def tokenize_lines(raw_lines, ignore_case=True):
