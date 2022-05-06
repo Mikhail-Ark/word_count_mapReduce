@@ -1,6 +1,6 @@
 from re import findall
 
-from worker.utils import make_text_generator, write_output
+from tasks.io import make_text_generator, write_output
 
 
 def word_count_map(

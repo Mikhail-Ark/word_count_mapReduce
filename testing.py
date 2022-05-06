@@ -1,9 +1,9 @@
 from os import listdir, path, remove
 from unittest import TestCase, main
 
-from worker.tasks.map import tokenize, tokenize_lines, word_count_map
-from worker.tasks.reduce import count, find_files_to_reduce, word_count_reduce
-from worker.utils import is_empty_file, make_text_generator_merge_join
+from tasks.map import tokenize, tokenize_lines, word_count_map
+from tasks.reduce import count, find_files_to_reduce, word_count_reduce
+from tasks.io import is_empty_file, make_text_generator_merge_join
 
 INPUT_PATH = "./files/inputs/testing/"
 INTERMEDIATE_PATH = "./files/intermediate/testing/"

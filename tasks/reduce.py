@@ -1,7 +1,7 @@
 from collections import Counter
 from os import listdir
 
-from worker.utils import is_empty_file, make_text_generator, write_output
+from tasks.io import is_empty_file, make_text_generator, write_output
 
 
 def word_count_reduce(input_path, output_path, job_id=0, merge_join=False):
