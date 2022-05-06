@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package wordcount_mr;
+
+service WordCountMR {
+  rpc DoTask(Task) returns (Status) {}
+}
+
+message Task {
+
+  enum TaskType {
+    WORDCOUNT_MAP = 0;
+    WORDCOUNT_REDUCE = 1;
+  }
+
+  // common
+  TaskType type = 1;
+  repeated string input = 2;
+  string output = 3;
+  int32 job_id = 4;
+
+  // map-specific
+  optional bool ignore_case = 5;
+  optional bool sort = 6;
+  optional int32 n_buckets = 7;
+
+  // reduce-specific
+  optional bool merge_join = 8;
+}
+
+message Status {
+  bool success = 1;
+}
