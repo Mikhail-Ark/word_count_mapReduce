@@ -7,10 +7,10 @@ def word_count_reduce(
     input_path, output_path, input_file_names, output_file_name="out",
     job_id=0, merge_join=False
 ):
-    input_files_paths = find_files_for_task(
+    files_for_task = find_files_for_task(
         input_path, input_file_names, job_id
     )
-    words = make_text_generator(input_files_paths, merge_join)
+    words = make_text_generator(files_for_task, merge_join)
     counter_items = count(words, merge_join)
     write_output(
         items_to_str(counter_items), f"{output_path}{output_file_name}-{job_id}"
