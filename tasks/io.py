@@ -1,4 +1,4 @@
-from os import stat
+from os import listdir, stat
 
 
 def make_text_generator(input_file_path, merge_join=False):
@@ -78,6 +78,28 @@ def which_bucket(word, n_buckets):
     if n_buckets is None:
         return 0
     return ord(word[0]) % n_buckets
+
+
+def find_files_for_task(input_path, input_file_names=None, job_id=None):
+    file_names = [
+        file_name for file_name in listdir(input_path)
+        if not is_empty_file(input_path + file_name)
+    ]
+    if input_file_names:
+        if isinstance(input_file_names, str):
+            input_file_names = [input_file_names]
+        file_names = [
+            file_name for file_name in file_names \
+            if file_name in set(input_file_names)
+        ]
+    if job_id is not None:
+        file_name_ending = f"-{job_id}"
+        file_names = [
+            file_name for file_name in file_names \
+            if file_name.endswith(file_name_ending)
+        ]
+    files_for_task = [input_path + file_name for file_name in file_names]
+    return files_for_task
 
 
 def is_empty_file(file_path):
