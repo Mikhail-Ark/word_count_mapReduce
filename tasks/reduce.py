@@ -1,24 +1,21 @@
 from collections import Counter
-from os import listdir
 
-from tasks.io import is_empty_file, make_text_generator, write_output
+from tasks.io import find_files_for_task, make_text_generator, write_output
 
 
-def word_count_reduce(input_path, output_path, job_id=0, merge_join=False):
-    input_files_paths = find_files_to_reduce(input_path, job_id)
+def word_count_reduce(
+    input_path, output_path, input_file_names, output_file_name="out",
+    job_id=0, merge_join=False
+):
+    input_files_paths = find_files_for_task(
+        input_path, input_file_names, job_id
+    )
     words = make_text_generator(input_files_paths, merge_join)
     counter_items = count(words, merge_join)
-    write_output(items_to_str(counter_items), f"{output_path}-{job_id}")
+    write_output(
+        items_to_str(counter_items), f"{output_path}{output_file_name}-{job_id}"
+    )
     
-
-def find_files_to_reduce(input_path, job_id=0):
-    file_name_ending = f"-{job_id}"
-    return [
-        input_path + file_name for file_name in listdir(input_path)
-        if file_name.endswith(file_name_ending) and
-        not is_empty_file(input_path + file_name)
-    ]
-
 
 def count(words, sorted=False):
     if sorted:

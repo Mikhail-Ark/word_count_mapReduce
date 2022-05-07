@@ -2,7 +2,7 @@ from os import listdir, path, remove
 from unittest import TestCase, main
 
 from tasks.map import tokenize, tokenize_lines, word_count_map
-from tasks.reduce import count, find_files_to_reduce, word_count_reduce
+from tasks.reduce import count, find_files_for_task, word_count_reduce
 from tasks.io import is_empty_file, make_text_generator_merge_join
 
 INPUT_PATH = "./files/inputs/testing/"
@@ -101,9 +101,9 @@ class TestMethodsSimple(TestCase):
         self.assertEqual(res, expected_res)
 
 
-    def test_unit_find_files_to_reduce(self):
+    def test_unit_find_files_for_task(self):
         res = set(
-            find_files_to_reduce(INTERMEDIATE_PATH, job_id=9)
+            find_files_for_task(INTERMEDIATE_PATH, job_id=9)
         )
         expected_res = {
             f"{INTERMEDIATE_PATH}test-merge-sort-{i}-9" for i in (0, 1, 3)
@@ -112,7 +112,7 @@ class TestMethodsSimple(TestCase):
 
 
     def test_unit_make_text_generator_merge_join(self):
-        file_list = find_files_to_reduce(INTERMEDIATE_PATH, job_id=9)
+        file_list = find_files_for_task(INTERMEDIATE_PATH, job_id=9)
         res = list(make_text_generator_merge_join(file_list))
         expected_res = [
             'aa', 'aaa', 'bbb', 'ccc', 'ccc', 'ccc',
@@ -145,33 +145,35 @@ class TestMethodsOutputFiles(TestCase):
 
 
     def test_functional_word_count_map_single(self):
-        input_file_path = INPUT_PATH + "test_single.txt"
-        output_path = INTERMEDIATE_PATH + "_test-single"
+        output_file_name = "_test-single"
         word_count_map(
-            input_file_path, output_path, n_buckets=1
+            INPUT_PATH, INTERMEDIATE_PATH, "test_single.txt", output_file_name, 
+            n_buckets=1
         )
-        with open(output_path + "-0-0", "r") as file:
+        with open(INTERMEDIATE_PATH + output_file_name + "-0-0", "r") as file:
             res = file.read()
         expected_res = "hello\n"
         self.assertEqual(res, expected_res)
 
 
     def test_functional_word_count_map_empty(self):
-        input_file_path = INPUT_PATH + "test_empty.txt"
-        output_file_path = INTERMEDIATE_PATH + "_test-empty"
+        output_file_name = "_test-empty"
         word_count_map(
-            input_file_path, output_file_path, n_buckets=1
+            INPUT_PATH, INTERMEDIATE_PATH, "test_empty.txt", output_file_name, 
+            n_buckets=1
         )
-        self.assertFalse(path.isfile(output_file_path + "-0"))
+        self.assertFalse(
+            path.isfile(INTERMEDIATE_PATH + output_file_name + "-0")
+        )
 
 
     def test_functional_word_count_map_small(self):
-        input_file_path = INPUT_PATH + "test_small.txt"
-        output_path = INTERMEDIATE_PATH + "_test-small"
+        output_file_name = "_test-small"
         word_count_map(
-            input_file_path, output_path, n_buckets=1
+            INPUT_PATH, INTERMEDIATE_PATH, "test_small.txt", output_file_name, 
+            n_buckets=1, ignore_case=True
         )
-        with open(output_path + "-0-0", "r") as file:
+        with open(INTERMEDIATE_PATH + output_file_name + "-0-0", "r") as file:
             res = file.read()
         expected_res = """algernon\ni\nreally\ndon\nt\nsee\nanything\nromantic
 in\nproposing\nit\nis\nvery\nromantic\nto\nbe\nin\nlove\nbut\nthere\nis\nnothing
@@ -183,12 +185,12 @@ certainly\ntry\nto\nforget\nthe\nfact\n"""
 
 
     def test_functional_word_count_map_sort(self):
-        input_file_path = INPUT_PATH + "test_small.txt"
-        output_path = INTERMEDIATE_PATH + "_test-small"
+        output_file_name = "_test-small"
         word_count_map(
-            input_file_path, output_path, sort=True, n_buckets=1
+            INPUT_PATH, INTERMEDIATE_PATH, "test_small.txt", output_file_name, 
+            n_buckets=1, ignore_case=True, sort=True
         )
-        with open(output_path + "-0-0", "r") as file:
+        with open(INTERMEDIATE_PATH + output_file_name + "-0-0", "r") as file:
             res = file.read()
         expected_res = """a\nabout\naccepted\nalgernon\nall\nanything\nbe\nbe
 believe\nbut\ncertainly\ndefinite\ndon\nessence\never\nexcitement\nfact\nforget
@@ -200,23 +202,23 @@ usually\nvery\nvery\nwhy\n"""
 
 
     def test_functional_word_count_map_case(self):
-        input_file_path = INPUT_PATH + "test_small.txt"
-        output_path = INTERMEDIATE_PATH + "_test-small"
+        output_file_name = "_test-small"
         word_count_map(
-            input_file_path, output_path, ignore_case=False, n_buckets=1
+            INPUT_PATH, INTERMEDIATE_PATH, "test_small.txt", output_file_name, 
+            n_buckets=1, ignore_case=False, sort=True
         )
-        with open(output_path + "-0-0", "r") as file:
+        with open(INTERMEDIATE_PATH + output_file_name + "-0-0", "r") as file:
             res = file.read()
         self.assertEqual(sum(c.isupper() for c in res), 12)
 
 
     def test_functional_word_count_map_usual(self):
-        input_file_path = INPUT_PATH + "test_usual.txt"
-        output_path = INTERMEDIATE_PATH + "_test-usual"
+        output_file_name = "_test-usual"
         word_count_map(
-            input_file_path, output_path, n_buckets=1
+            INPUT_PATH, INTERMEDIATE_PATH, "test_usual.txt", output_file_name, 
+            n_buckets=1, ignore_case=True, sort=False
         )
-        with open(output_path + "-0-0", "r") as file:
+        with open(INTERMEDIATE_PATH + output_file_name + "-0-0", "r") as file:
             res = file.read()
         self.assertEqual(len(res), 129609)
         res_split = res.split()
@@ -225,10 +227,10 @@ usually\nvery\nvery\nwhy\n"""
 
 
     def test_functional_word_count_map_buckets_single(self):
-        input_file_path = INPUT_PATH + "test_single.txt"
-        output_path = INTERMEDIATE_PATH + "_test-single"
+        output_file_name = "_test-single"
         word_count_map(
-            input_file_path, output_path, n_buckets=5
+            INPUT_PATH, INTERMEDIATE_PATH, "test_single.txt", output_file_name, 
+            n_buckets=5, ignore_case=True, sort=False
         )
         expected_res = "hello\n"
         test_files = [
@@ -242,10 +244,10 @@ usually\nvery\nvery\nwhy\n"""
 
 
     def test_functional_word_count_map_buckets_empty(self):
-        input_file_path = INPUT_PATH + "test_empty.txt"
-        output_path = INTERMEDIATE_PATH + "_test-empty"
+        output_file_name = "_test-empty"
         word_count_map(
-            input_file_path, output_path, n_buckets=5
+            INPUT_PATH, INTERMEDIATE_PATH, "test_empty.txt", output_file_name,
+            n_buckets=5
         )
         test_files = [
             f for f in listdir(INTERMEDIATE_PATH) \
@@ -255,10 +257,10 @@ usually\nvery\nvery\nwhy\n"""
 
 
     def test_functional_word_count_map_buckets_small(self):
-        input_file_path = INPUT_PATH + "test_small.txt"
-        output_path = INTERMEDIATE_PATH + "_test-small"
+        output_file_name = "_test-small"
         word_count_map(
-            input_file_path, output_path, n_buckets=5
+            INPUT_PATH, INTERMEDIATE_PATH, "test_small.txt", output_file_name,
+            n_buckets=5, ignore_case=True
         )
         expected_res = [
             "i\ndon\nsee\nin\nit\nis\nin\nis\nnothing\ndefinite\nis\ni\nis\nis\nif\ni\ni\n",
@@ -280,10 +282,10 @@ usually\nvery\nvery\nwhy\n"""
 
 
     def test_functional_word_count_map_buckets_sort(self):
-        input_file_path = INPUT_PATH + "test_small.txt"
-        output_path = INTERMEDIATE_PATH + "_test-small"
+        output_file_name = "_test-small"
         word_count_map(
-            input_file_path, output_path, sort=True, n_buckets=5
+            INPUT_PATH, INTERMEDIATE_PATH, "test_small.txt", output_file_name,
+            n_buckets=5, ignore_case=True, sort=True
         )
         expected_res = [
             "definite\ndon\ni\ni\ni\ni\nif\nin\nin\nis\nis\nis\nis\nis\nit\nnothing\nsee\n",
@@ -307,7 +309,8 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_single(self):
         job_id = 4
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
+            INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
+            job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -318,7 +321,8 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_empty(self):
         job_id = 999
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
+            INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
+            job_id, merge_join=False
         )
         output_file_path = f"{OUTPUT_PATH}_test-{job_id}"
         self.assertTrue(path.isfile(output_file_path))
@@ -328,7 +332,8 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_small(self):
         job_id = 5
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
+            INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
+            job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = set(file.read().split("\n"))
@@ -349,7 +354,8 @@ usually\nvery\nvery\nwhy\n"""
     def test_functional_word_count_reduce_small_sorted(self):
         job_id = 2
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=True
+            INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
+            job_id, merge_join=True
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -365,7 +371,8 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
     def test_functional_word_count_reduce_usual(self):
         job_id = 3
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", job_id, merge_join=False
+            INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
+            job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -376,7 +383,7 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
     def test_functional_word_count_reduce_small_bubkets(self):
         job_id = 0
         word_count_reduce(
-            INTERMEDIATE_PATH + "small_buckets/", OUTPUT_PATH + "_test",
+            INTERMEDIATE_PATH + "small_buckets/", OUTPUT_PATH, None, "_test",
             job_id, merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
@@ -398,8 +405,8 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
     def test_functional_word_count_reduce_small_bubkets_sorted(self):
         job_id = 0
         word_count_reduce(
-            INTERMEDIATE_PATH + "small_buckets_sorted/", OUTPUT_PATH + "_test",
-            job_id, merge_join=True
+            INTERMEDIATE_PATH + "small_buckets_sorted/", OUTPUT_PATH,
+            None, "_test", job_id, merge_join=True
         )
         with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
             res = file.read()
@@ -413,38 +420,12 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
 
 
     def test_functional_map_reduce_small_single_job(self):
-        input_file_path = INPUT_PATH + "test_small.txt"
-        intermediate_path = INTERMEDIATE_PATH + "_test-small"
         word_count_map(
-            input_file_path, intermediate_path, n_buckets=1
+            INPUT_PATH, INTERMEDIATE_PATH, "test_small.txt", "_test-small",
+            n_buckets=1, ignore_case=True
         )
         word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_join=False
-        )
-        with open(f"{OUTPUT_PATH}_test-{0}", "r") as file:
-            res = set(file.read().split("\n"))
-        expected_res = {
-            '', 'a 1', 'about 1', 'accepted 1', 'algernon 1', 'all 1',
-            'anything 1', 'be 2', 'believe 1', 'but 1', 'certainly 1',
-            'definite 1', 'don 1', 'essence 1', 'ever 1', 'excitement 1',
-            'fact 1', 'forget 1', 'get 1', 'i 4', 'if 1', 'in 2', 'is 5',
-            'it 1', 'll 1', 'love 1', 'married 1', 'may 1', 'nothing 1',
-            'of 1', 'one 2', 'over 1', 'proposal 1', 'proposing 1', 'really 1',
-            'romance 1', 'romantic 3', 'see 1', 't 1', 'the 3', 'then 1',
-            'there 1', 'to 2', 'try 1', 'uncertainty 1', 'usually 1', 'very 2',
-            'why 1'
-        }
-        self.assertEqual(res, expected_res)
-
-
-    def test_functional_map_reduce_small_single_job(self):
-        input_file_path = INPUT_PATH + "test_small.txt"
-        intermediate_path = INTERMEDIATE_PATH + "_test-small"
-        word_count_map(
-            input_file_path, intermediate_path, n_buckets=1
-        )
-        word_count_reduce(
-            INTERMEDIATE_PATH, OUTPUT_PATH + "_test", merge_join=False
+            INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test", merge_join=False
         )
         with open(f"{OUTPUT_PATH}_test-{0}", "r") as file:
             res = set(file.read().split("\n"))
@@ -463,16 +444,15 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
 
 
     def test_functional_map_reduce_usual_multiple_jobs(self):
-        input_file_path = INPUT_PATH + "test_usual.txt"
-        intermediate_path = INTERMEDIATE_PATH + "_test-usual"
         n_jobs = 2
         word_count_map(
-            input_file_path, intermediate_path, n_buckets=n_jobs
+            INPUT_PATH, INTERMEDIATE_PATH, "test_usual.txt", "_test-usual",
+            n_buckets=n_jobs, ignore_case=True
         )
         res = set()
         for job_id in range(n_jobs):
             word_count_reduce(
-                INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
+                INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
                 job_id=job_id, merge_join=False
             )
             with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
@@ -483,21 +463,20 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
 
 
     def test_functional_map_reduce_both_multiple_jobs(self):
-        input_file_paths = [
-            INPUT_PATH + "test_usual.txt",
-            INPUT_PATH + "test_small.txt",
+        input_file_name = [
+            "test_usual.txt",
+            "test_small.txt",
         ]
-        intermediate_path = INTERMEDIATE_PATH + "_test-usual"
         n_jobs = 2
         for job_id in range(n_jobs):
             word_count_map(
-                input_file_paths[job_id], intermediate_path,
-                job_id=job_id, n_buckets=n_jobs
+                INPUT_PATH, INTERMEDIATE_PATH, input_file_name[job_id], "_test",
+                job_id=job_id, n_buckets=n_jobs, ignore_case=True
             )
         res = set()
         for job_id in range(n_jobs):
             word_count_reduce(
-                INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
+                INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
                 job_id=job_id, merge_join=False
             )
             with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
@@ -508,21 +487,20 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
 
 
     def test_functional_map_reduce_both_multiple_jobs_sorted(self):
-        input_file_paths = [
-            INPUT_PATH + "test_usual.txt",
-            INPUT_PATH + "test_small.txt",
+        input_file_name = [
+            "test_usual.txt",
+            "test_small.txt",
         ]
-        intermediate_path = INTERMEDIATE_PATH + "_test-usual"
         n_jobs = 2
         for job_id in range(n_jobs):
             word_count_map(
-                input_file_paths[job_id], intermediate_path,
-                job_id=job_id, sort=True, n_buckets=n_jobs
+                INPUT_PATH, INTERMEDIATE_PATH, input_file_name[job_id], "_test",
+                job_id=job_id, n_buckets=n_jobs, ignore_case=True, sort=True
             )
         res = set()
         for job_id in range(n_jobs):
             word_count_reduce(
-                INTERMEDIATE_PATH, OUTPUT_PATH + "_test",
+                INTERMEDIATE_PATH, OUTPUT_PATH, None, "_test",
                 job_id=job_id, merge_join=True
             )
             with open(f"{OUTPUT_PATH}_test-{job_id}", "r") as file:
