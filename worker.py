@@ -90,6 +90,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logging.basicConfig(
         filename=f"./logs/worker_{args.worker_id}.log", level=logging.DEBUG,
-        format="%(asctime)s %(message)s", filemode='w'
+        format="%(asctime)s %(message)s", filemode="w"
     )
     serve()

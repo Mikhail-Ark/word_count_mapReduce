@@ -3,7 +3,7 @@ from unittest import TestCase, main
 
 from tasks.map import tokenize, tokenize_lines, word_count_map
 from tasks.reduce import count, find_files_for_task, word_count_reduce
-from tasks.io import is_empty_file, make_text_generator_merge_join
+from tasks.io import is_dir_or_empty_file, make_text_generator_merge_join
 
 INPUT_PATH = "./files/inputs/testing/"
 INTERMEDIATE_PATH = "./files/intermediate/testing/"
@@ -326,7 +326,7 @@ usually\nvery\nvery\nwhy\n"""
         )
         output_file_path = f"{OUTPUT_PATH}_test-{job_id}"
         self.assertTrue(path.isfile(output_file_path))
-        self.assertTrue(is_empty_file(output_file_path))
+        self.assertTrue(is_dir_or_empty_file(output_file_path))
 
 
     def test_functional_word_count_reduce_small(self):

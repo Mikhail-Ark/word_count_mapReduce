@@ -4,7 +4,7 @@ from tasks.io import find_files_for_task, make_text_generator, write_output
 
 
 def word_count_reduce(
-    input_path, output_path, input_file_names, output_file_name="out",
+    input_path, output_path, input_file_names=None, output_file_name="out",
     job_id=0, merge_join=False
 ):
     files_for_task = find_files_for_task(
