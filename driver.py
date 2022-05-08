@@ -1,4 +1,3 @@
-from codecs import ignore_errors
 import logging
 
 import grpc
@@ -16,9 +15,10 @@ def run():
 
 def make_map_task():
     return wordcount_mr_pb2.Task(
-        type=wordcount_mr_pb2.Task.WORDCOUNT_MAP,
-        input=["./files/inputs/testing/test_small.txt"],
-        output="./files/intermediate/testing/",
+        type=wordcount_mr_pb2.Task.MAP,
+        input_path="./files/inputs/testing/",
+        output_path="./files/intermediate/testing/",
+        input_file_names = ["test_small.txt"],
         job_id = 0,
         ignore_case=False,
         sort=False,

@@ -9,23 +9,25 @@ service WordCountMR {
 message Task {
 
   enum TaskType {
-    WORDCOUNT_MAP = 0;
-    WORDCOUNT_REDUCE = 1;
+    MAP = 0;
+    REDUCE = 1;
   }
 
   // common
   TaskType type = 1;
-  repeated string input = 2;
-  string output = 3;
-  int32 job_id = 4;
+  string input_path = 2;
+  string output_path = 3;
+  repeated string input_file_names = 4;
+  optional string output_file_name = 5;
+  int32 job_id = 6;
 
   // map-specific
-  optional bool ignore_case = 5;
-  optional bool sort = 6;
-  optional int32 n_buckets = 7;
+  optional bool ignore_case = 7;
+  optional bool sort = 8;
+  optional int32 n_buckets = 9;
 
   // reduce-specific
-  optional bool merge_join = 8;
+  optional bool merge_join = 10;
 }
 
 message Status {
