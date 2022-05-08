@@ -1,4 +1,4 @@
-from os import listdir, path, remove
+from os import listdir, path, remove, system
 from unittest import TestCase, main
 
 from tasks.map import tokenize, tokenize_lines, word_count_map
@@ -510,6 +510,30 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         self.assertEqual(len(res), 3058)
         self.assertTrue("diary 14" in res)
         self.assertTrue("algernon 272" in res)
+
+
+class TestMethodsFinal(TestCase):
+
+    def test_functional_single_worker(self):
+        N = 6
+        M = 4
+        system(f"python worker.py & python driver.py -N {N} -M {M}")
+        intermediate_files = [
+            f"./files/intermediate/mr-{n}-{m}" \
+            for n in range(N) for m in range(M)
+        ]
+        output_files = [f"./files/out/out-{m}" for m in range(M)]
+        res = set()
+        for file_path in intermediate_files + output_files:
+            self.assertFalse(is_dir_or_empty_file(file_path))
+            with open(file_path, "r") as file:
+                contents = file.read().split("\n")
+            res.update(set(contents))
+        self.assertEqual(len(res), 45437)
+        self.assertTrue("responsibility 5" in res)
+        self.assertTrue("spoke 104" in res)
+        self.assertTrue("husky 4" in res)
+        self.assertTrue("go 945" in res)
 
 
 if __name__ == "__main__":
