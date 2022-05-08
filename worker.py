@@ -1,3 +1,4 @@
+import argparse
 from concurrent import futures
 import logging
 
@@ -20,11 +21,15 @@ REDUCE_DEFAULT_OUTPUT_NAME = "out"
 class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
     def DoTask(self, request, context):
+        logging.info("do task")
         task_type, params = self.unpack_params(request)
         if task_type == wordcount_mr_pb2.Task.MAP:
+            logging.info(f"task map: {str(params)}")
             word_count_map(**params)
         elif task_type == wordcount_mr_pb2.Task.REDUCE:
+            logging.info(f"task reduce: {str(params)}")
             word_count_reduce(**params)
+        logging.info("finished")
         return wordcount_mr_pb2.Status(success=True)
 
 
@@ -66,13 +71,25 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
 
 def serve():
+    logging.info("run")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    wordcount_mr_pb2_grpc.add_WordCountMRServicer_to_server(WordCountMR(), server)
-    server.add_insecure_port('[::]:50051')
+    wordcount_mr_pb2_grpc.add_WordCountMRServicer_to_server(
+        WordCountMR(), server
+    )
+    server.add_insecure_port("[::]:50051")
     server.start()
     server.wait_for_termination()
 
 
-if __name__ == '__main__':
-    logging.basicConfig()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--worker_id", "-i", type=int, nargs="?", const=1, default=1,
+        help="worker id"
+    )
+    args = parser.parse_args()
+    logging.basicConfig(
+        filename=f"./logs/worker_{args.worker_id}.log", level=logging.DEBUG,
+        format="%(asctime)s %(message)s", filemode='w'
+    )
     serve()
