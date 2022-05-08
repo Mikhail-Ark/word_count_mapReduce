@@ -11,15 +11,16 @@ message Task {
   enum TaskType {
     MAP = 0;
     REDUCE = 1;
+    TERMINATE = 2;
   }
 
   // common
   TaskType type = 1;
-  string input_path = 2;
-  string output_path = 3;
+  optional string input_path = 2;
+  optional string output_path = 3;
   repeated string input_file_names = 4;
   optional string output_file_name = 5;
-  int32 job_id = 6;
+  optional int32 job_id = 6;
 
   // map-specific
   optional bool ignore_case = 7;

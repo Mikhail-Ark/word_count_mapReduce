@@ -1,6 +1,7 @@
 import argparse
 from concurrent import futures
 import logging
+from threading import Event
 
 import grpc
 import wordcount_mr_pb2
@@ -20,6 +21,10 @@ REDUCE_DEFAULT_OUTPUT_NAME = "out"
 
 class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
+    def __init__(self, stop_event):
+        self._stop_event = stop_event
+
+
     def DoTask(self, request, context):
         logging.info("do task")
         task_type, params = self.unpack_params(request)
@@ -29,6 +34,9 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
         elif task_type == wordcount_mr_pb2.Task.REDUCE:
             logging.info(f"task reduce: {str(params)}")
             word_count_reduce(**params)
+        elif wordcount_mr_pb2.Task.TERMINATE:
+            logging.info("task terminate")
+            self._stop_event.set()
         logging.info("finished")
         return wordcount_mr_pb2.Status(success=True)
 
@@ -65,6 +73,8 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
                 params["merge_join"] = REDUCE_DEFAULT_MERGE_JOIN
             if "output_file_name" not in params:
                 params["output_file_name"] = REDUCE_DEFAULT_OUTPUT_NAME
+        elif task_type == wordcount_mr_pb2.Task.TERMINATE:
+            return task_type, None
         else:
             raise AssertionError("Unknown task type")
         return task_type, params
@@ -73,11 +83,14 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 def serve():
     logging.info("run")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    stop_event = Event()
     wordcount_mr_pb2_grpc.add_WordCountMRServicer_to_server(
-        WordCountMR(), server
+        WordCountMR(stop_event), server
     )
     server.add_insecure_port("[::]:50051")
     server.start()
+    stop_event.wait()
+    server.stop(grace=True)
     server.wait_for_termination()
 
 

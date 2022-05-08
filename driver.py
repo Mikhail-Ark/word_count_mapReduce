@@ -17,12 +17,19 @@ def run(n_map, n_reduce):
     logging.info(f"run with n_map={n_map}, n_reduce={n_reduce}")
     map_tasks = prepare_map_tasks(n_map)
     reduce_tasks = prepare_reduce_tasks(n_reduce)
+    terminate_task = make_terminate_task()
+
     with grpc.insecure_channel("localhost:50051") as channel:
         stub = wordcount_mr_pb2_grpc.WordCountMRStub(channel)
-        for task in map_tasks + reduce_tasks:
-            logging.info("send task")
-            response = stub.DoTask(task)
-            logging.info(f"success: {str(response.success)}")
+        for task_type, tasks in (
+            ("map", map_tasks), ("reduce", reduce_tasks),
+            ("terminate", [terminate_task])
+        ):
+            for task in tasks:
+                logging.info(f"send {task_type} task")
+                response = stub.DoTask(task)
+                logging.info(f"success: {str(response.success)}")
+            logging.info(f"{task_type} tasks are done")
 
 
 def prepare_map_tasks(n_map):
@@ -69,6 +76,12 @@ def make_reduce_task(job_id):
         input_path=INTERMEDIATE_PATH,
         output_path=OUTPUT_PATH,
         job_id=job_id
+    )
+
+
+def make_terminate_task():
+    return wordcount_mr_pb2.Task(
+        type=wordcount_mr_pb2.Task.TERMINATE,
     )
 
 
