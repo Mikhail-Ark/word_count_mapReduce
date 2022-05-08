@@ -15,7 +15,7 @@ OUTPUT_PATH = "./files/out/"
 
 def run(n_map, n_reduce):
     logging.info(f"run with n_map={n_map}, n_reduce={n_reduce}")
-    map_tasks = prepare_map_tasks(n_map)
+    map_tasks = prepare_map_tasks(n_map, n_reduce)
     reduce_tasks = prepare_reduce_tasks(n_reduce)
     terminate_task = make_terminate_task()
 
@@ -32,11 +32,11 @@ def run(n_map, n_reduce):
             logging.info(f"{task_type} tasks are done")
 
 
-def prepare_map_tasks(n_map):
+def prepare_map_tasks(n_map, n_reduce):
     file_names = find_files_for_task(INPUT_PATH, only_names=True)
     files_for_map = split_files_for_map(file_names, n_map)
     return [
-        make_map_task(job_id, input_file_names) \
+        make_map_task(job_id, input_file_names, n_buckets=n_reduce) \
         for job_id, input_file_names in enumerate(files_for_map)
     ]
 
@@ -53,6 +53,10 @@ def split_files_for_map(file_names, n_map):
             files_for_map.append(batch)
             i += batch_size
             batch = file_names[i:i+batch_size]
+            if len(file_names[i:]) == n_map - len(files_for_map):
+                for file_name in file_names[i:]:
+                    files_for_map.append([file_name])
+                break
         return files_for_map
 
 
@@ -60,13 +64,14 @@ def prepare_reduce_tasks(n_reduce):
     return [make_reduce_task(job_id) for job_id in range(n_reduce)]
 
 
-def make_map_task(job_id, input_file_names):
+def make_map_task(job_id, input_file_names, n_buckets):
     return wordcount_mr_pb2.Task(
         type=wordcount_mr_pb2.Task.MAP,
         input_path=INPUT_PATH,
         output_path=INTERMEDIATE_PATH,
         input_file_names=input_file_names,
-        job_id=job_id
+        job_id=job_id,
+        n_buckets=n_buckets
     )
 
 
