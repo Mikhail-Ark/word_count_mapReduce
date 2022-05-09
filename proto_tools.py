@@ -16,7 +16,7 @@ WAIT_DEFAULT_MILLISECONDS = 500
 
 def request_to_string(request):
     request_list = [
-            f"status: {str(request.status)}",
+            f"status: {('INIT', 'SUCCESS', 'FAILURE')[request.status]}",
             f"worker_id: {str(request.worker_id)}",
         ]
     if request.output_file_names:
