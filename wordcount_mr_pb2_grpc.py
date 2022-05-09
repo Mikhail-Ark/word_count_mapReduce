@@ -14,17 +14,17 @@ class WordCountMRStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.DoTask = channel.unary_unary(
-                '/wordcount_mr.WordCountMR/DoTask',
-                request_serializer=wordcount__mr__pb2.Task.SerializeToString,
-                response_deserializer=wordcount__mr__pb2.Status.FromString,
+        self.GetTask = channel.unary_unary(
+                '/wordcount_mr.WordCountMR/GetTask',
+                request_serializer=wordcount__mr__pb2.TaskRequest.SerializeToString,
+                response_deserializer=wordcount__mr__pb2.Task.FromString,
                 )
 
 
 class WordCountMRServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def DoTask(self, request, context):
+    def GetTask(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -33,10 +33,10 @@ class WordCountMRServicer(object):
 
 def add_WordCountMRServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'DoTask': grpc.unary_unary_rpc_method_handler(
-                    servicer.DoTask,
-                    request_deserializer=wordcount__mr__pb2.Task.FromString,
-                    response_serializer=wordcount__mr__pb2.Status.SerializeToString,
+            'GetTask': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTask,
+                    request_deserializer=wordcount__mr__pb2.TaskRequest.FromString,
+                    response_serializer=wordcount__mr__pb2.Task.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -49,7 +49,7 @@ class WordCountMR(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def DoTask(request,
+    def GetTask(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +59,8 @@ class WordCountMR(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/wordcount_mr.WordCountMR/DoTask',
-            wordcount__mr__pb2.Task.SerializeToString,
-            wordcount__mr__pb2.Status.FromString,
+        return grpc.experimental.unary_unary(request, target, '/wordcount_mr.WordCountMR/GetTask',
+            wordcount__mr__pb2.TaskRequest.SerializeToString,
+            wordcount__mr__pb2.Task.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

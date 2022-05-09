@@ -3,7 +3,7 @@ syntax = "proto3";
 package wordcount_mr;
 
 service WordCountMR {
-  rpc GetTask(Status) returns (Task) {}
+  rpc GetTask(TaskRequest) returns (Task) {}
 }
 
 
