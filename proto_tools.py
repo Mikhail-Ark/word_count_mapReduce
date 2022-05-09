@@ -56,7 +56,7 @@ def make_terminate_task():
     )
 
 
-def make_wait_task(milliseconds):
+def make_wait_task(milliseconds=WAIT_DEFAULT_MILLISECONDS):
     return wordcount_mr_pb2.Task(
         type=wordcount_mr_pb2.Task.WAIT, wait_milliseconds=milliseconds
     )
