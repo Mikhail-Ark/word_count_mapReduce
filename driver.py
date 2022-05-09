@@ -6,30 +6,28 @@ import logging
 from math import ceil
 from threading import Event
 
+from proto_tools import INPUT_PATH, make_map_task, make_reduce_task, \
+        make_terminate_task, request_to_string, task_type_to_string
+from tasks.io import find_files_for_task
 import wordcount_mr_pb2
 import wordcount_mr_pb2_grpc
 
-from tasks.io import find_files_for_task
-
-INPUT_PATH = "./files/inputs/"
-INTERMEDIATE_PATH = "./files/intermediate/"
-OUTPUT_PATH = "./files/out/"
 
 
 class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
     def __init__(self, stop_event, n_map, n_reduce):
         self.stop_event = stop_event
-        self.map_tasks = self.prepare_map_tasks(n_map, n_reduce)
-        self.reduce_tasks = self.prepare_reduce_tasks(n_reduce)
-        self.terminate_task = self.make_terminate_task()
+        self.map_tasks = WordCountMR.prepare_map_tasks(n_map, n_reduce)
+        self.reduce_tasks = WordCountMR.prepare_reduce_tasks(n_reduce)
+        self.terminate_task = make_terminate_task()
         self.task_generator = self.make_task_generatior()
         self.current_task_type = wordcount_mr_pb2.Task.MAP
 
 
     def GetTask(self, request, context):
         logging.info("request received")
-        logging.info(WordCountMR.request_to_string(request))
+        logging.info(request_to_string(request))
         try:
             task = next(self.task_generator)
         except StopIteration:
@@ -37,14 +35,14 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
         if task.type != self.current_task_type:
             logging.info(
                 f"""{
-                    WordCountMR.task_type_to_string(self.current_task_type)
+                    task_type_to_string(self.current_task_type)
                 } tasks are done"""
             )
             self.current_task_type = task.type
             if task.type == wordcount_mr_pb2.Task.TERMINATE:
                 self.stop_event.set()
         logging.info(
-            f"send {WordCountMR.task_type_to_string(task.type)} task"
+            f"send {task_type_to_string(task.type)} task"
         )
         return task
 
@@ -57,31 +55,19 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
 
     @staticmethod
-    def request_to_string(request):
-        request_list = [
-                f"status: {str(request.status)}",
-                f"worker_id: {str(request.worker_id)}",
-            ]
-        if request.output_file_names:
-            request_list.append(
-                f"output_file_names: {' '.join(request.output_file_names)}"
-            )
-        if request.warnings:
-            request_list.append(
-                f"warnings: {' '.join(request.warnings)}"
-            )
-        return " | ".join(request_list)
-
-
-    @staticmethod
     def prepare_map_tasks(n_map, n_reduce):
         file_names = find_files_for_task(INPUT_PATH, only_names=True)
         files_for_map = WordCountMR.split_files_for_map(file_names, n_map)
         return [
-            WordCountMR.make_map_task(
+            make_map_task(
                 job_id, input_file_names, n_buckets=n_reduce
             ) for job_id, input_file_names in enumerate(files_for_map)
         ]
+
+
+    @staticmethod
+    def prepare_reduce_tasks(n_reduce):
+        return [make_reduce_task(job_id) for job_id in range(n_reduce)]
 
 
     @staticmethod
@@ -102,52 +88,6 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
                         files_for_map.append([file_name])
                     break
             return files_for_map
-
-
-    @staticmethod
-    def prepare_reduce_tasks(n_reduce):
-        return [WordCountMR.make_reduce_task(job_id) for job_id in range(n_reduce)]
-
-
-    @staticmethod
-    def make_map_task(job_id, input_file_names, n_buckets):
-        return wordcount_mr_pb2.Task(
-            type=wordcount_mr_pb2.Task.MAP,
-            input_path=INPUT_PATH,
-            output_path=INTERMEDIATE_PATH,
-            input_file_names=input_file_names,
-            job_id=job_id,
-            n_buckets=n_buckets
-        )
-
-
-    @staticmethod
-    def make_reduce_task(job_id):
-        return wordcount_mr_pb2.Task(
-            type=wordcount_mr_pb2.Task.REDUCE,
-            input_path=INTERMEDIATE_PATH,
-            output_path=OUTPUT_PATH,
-            job_id=job_id
-        )
-
-
-    @staticmethod
-    def make_terminate_task():
-        return wordcount_mr_pb2.Task(
-            type=wordcount_mr_pb2.Task.TERMINATE,
-        )
-
-
-    @staticmethod
-    def make_wait_task(milliseconds):
-        return wordcount_mr_pb2.Task(
-            type=wordcount_mr_pb2.Task.WAIT, wait_milliseconds=milliseconds
-        )
-
-
-    @staticmethod
-    def task_type_to_string(task_type):
-        return ('map', 'reduce', 'wait', 'terminate')[task_type]
 
 
 def serve(n_map, n_reduce):
