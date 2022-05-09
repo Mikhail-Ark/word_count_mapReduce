@@ -3,15 +3,17 @@ syntax = "proto3";
 package wordcount_mr;
 
 service WordCountMR {
-  rpc DoTask(Task) returns (Status) {}
+  rpc GetTask(Status) returns (Task) {}
 }
+
 
 message Task {
 
   enum TaskType {
     MAP = 0;
     REDUCE = 1;
-    TERMINATE = 2;
+    WAIT = 2;
+    TERMINATE = 3;
   }
 
   // common
@@ -29,8 +31,22 @@ message Task {
 
   // reduce-specific
   optional bool merge_join = 10;
+
+  // wait-specific
+  optional int32 wait_milliseconds = 11;
 }
 
-message Status {
-  bool success = 1;
+
+message TaskRequest {
+
+  enum Status {
+    INIT = 0;
+    SUCCESS = 1;
+    FAILURE = 2;
+  }
+
+  Status status = 1;
+  int32 worker_id = 2;
+  repeated string output_file_names = 3;
+  repeated string warnings = 4;
 }
