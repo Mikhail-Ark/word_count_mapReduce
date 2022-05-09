@@ -25,7 +25,7 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
         self.task_generator = self.make_task_generator()
 
 
-    def GetTask(self, request, context):
+    def GetTask(self, request, _):
         logging.info("request received")
         logging.info(request_to_string(request))
         worker_id = request.worker_id
