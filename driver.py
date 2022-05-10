@@ -60,7 +60,6 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
             if worker_id in self.workers:
                 self.workers.remove(worker_id)
                 if not self.workers:
-                    print("set")
                     self.stop_event.set()
         elif task.type == wordcount_mr_pb2.Task.WAIT:
             logging.info("idle wait!")
