@@ -21,7 +21,7 @@ message Task {
   optional string input_path = 2;
   optional string output_path = 3;
   repeated string input_file_names = 4;
-  optional string output_file_name = 5;
+  optional string output_prefix = 5;
   optional int32 job_id = 6;
 
   // map-specific
