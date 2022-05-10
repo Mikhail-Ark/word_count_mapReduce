@@ -1,0 +1,25 @@
+2022-05-10 18:59:34,011 run worker_id 2
+2022-05-10 18:59:34,016 task received
+2022-05-10 18:59:34,016 slippy=True
+2022-05-10 18:59:34,517 map: {'input_path': './files/inputs/testing/final/', 'output_path': './files/intermediate/', 'job_id': 2, 'input_file_names': ['pg-frankenstein.txt'], 'output_prefix': 'mr', 'ignore_case': False, 'sort': False, 'n_buckets': 4}
+2022-05-10 18:59:34,564 done
+2022-05-10 18:59:34,565 task received
+2022-05-10 18:59:34,565 slippy=True
+2022-05-10 18:59:35,065 map: {'input_path': './files/inputs/testing/final/', 'output_path': './files/intermediate/', 'job_id': 3, 'input_file_names': ['pg-tom_sawyer.txt'], 'output_prefix': 'mr', 'ignore_case': False, 'sort': False, 'n_buckets': 4}
+2022-05-10 18:59:35,110 done
+2022-05-10 18:59:35,111 task received
+2022-05-10 18:59:35,111 slippy=True
+2022-05-10 18:59:35,612 wait: {'wait_milliseconds': 500}
+2022-05-10 18:59:36,113 done
+2022-05-10 18:59:36,115 task received
+2022-05-10 18:59:36,115 slippy=True
+2022-05-10 18:59:36,615 reduce: {'input_path': './files/intermediate/', 'output_path': './files/out/', 'job_id': 2, 'output_prefix': 'out', 'merge_join': False}
+2022-05-10 18:59:36,643 done
+2022-05-10 18:59:36,644 task received
+2022-05-10 18:59:36,644 slippy=True
+2022-05-10 18:59:37,145 wait: {'wait_milliseconds': 500}
+2022-05-10 18:59:37,646 done
+2022-05-10 18:59:37,647 task received
+2022-05-10 18:59:37,647 slippy=True
+2022-05-10 18:59:38,148 terminate
+2022-05-10 18:59:38,149 terminated

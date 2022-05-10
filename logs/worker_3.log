@@ -1,0 +1,25 @@
+2022-05-10 18:59:34,011 run worker_id 3
+2022-05-10 18:59:34,015 task received
+2022-05-10 18:59:34,015 slippy=True
+2022-05-10 18:59:34,516 map: {'input_path': './files/inputs/testing/final/', 'output_path': './files/intermediate/', 'job_id': 0, 'input_file_names': ['pg-huckleberry_finn.txt', 'pg-sherlock_holmes.txt'], 'output_prefix': 'mr', 'ignore_case': False, 'sort': False, 'n_buckets': 4}
+2022-05-10 18:59:34,640 done
+2022-05-10 18:59:34,641 task received
+2022-05-10 18:59:34,641 slippy=True
+2022-05-10 18:59:35,141 map: {'input_path': './files/inputs/testing/final/', 'output_path': './files/intermediate/', 'job_id': 5, 'input_file_names': ['pg-being_ernest.txt'], 'output_prefix': 'mr', 'ignore_case': False, 'sort': False, 'n_buckets': 4}
+2022-05-10 18:59:35,157 done
+2022-05-10 18:59:35,157 task received
+2022-05-10 18:59:35,157 slippy=True
+2022-05-10 18:59:35,658 reduce: {'input_path': './files/intermediate/', 'output_path': './files/out/', 'job_id': 0, 'output_prefix': 'out', 'merge_join': False}
+2022-05-10 18:59:35,698 done
+2022-05-10 18:59:35,699 task received
+2022-05-10 18:59:35,699 slippy=True
+2022-05-10 18:59:36,200 reduce: {'input_path': './files/intermediate/', 'output_path': './files/out/', 'job_id': 1, 'output_prefix': 'out', 'merge_join': False}
+2022-05-10 18:59:36,242 done
+2022-05-10 18:59:36,243 task received
+2022-05-10 18:59:36,243 slippy=True
+2022-05-10 18:59:36,744 wait: {'wait_milliseconds': 500}
+2022-05-10 18:59:37,244 done
+2022-05-10 18:59:37,246 task received
+2022-05-10 18:59:37,246 slippy=True
+2022-05-10 18:59:37,747 terminate
+2022-05-10 18:59:37,748 terminated

@@ -1,0 +1,21 @@
+2022-05-10 18:59:34,011 run worker_id 1
+2022-05-10 18:59:34,016 task received
+2022-05-10 18:59:34,016 slippy=True
+2022-05-10 18:59:34,516 map: {'input_path': './files/inputs/testing/final/', 'output_path': './files/intermediate/', 'job_id': 1, 'input_file_names': ['pg-grimm.txt', 'pg-dorian_gray.txt'], 'output_prefix': 'mr', 'ignore_case': False, 'sort': False, 'n_buckets': 4}
+2022-05-10 18:59:34,620 done
+2022-05-10 18:59:34,620 task received
+2022-05-10 18:59:34,621 slippy=True
+2022-05-10 18:59:35,121 map: {'input_path': './files/inputs/testing/final/', 'output_path': './files/intermediate/', 'job_id': 4, 'input_file_names': ['pg-metamorphosis.txt'], 'output_prefix': 'mr', 'ignore_case': False, 'sort': False, 'n_buckets': 4}
+2022-05-10 18:59:35,134 done
+2022-05-10 18:59:35,135 task received
+2022-05-10 18:59:35,135 slippy=True
+2022-05-10 18:59:35,636 wait: {'wait_milliseconds': 500}
+2022-05-10 18:59:36,137 done
+2022-05-10 18:59:36,138 task received
+2022-05-10 18:59:36,139 slippy=True
+2022-05-10 18:59:36,639 reduce: {'input_path': './files/intermediate/', 'output_path': './files/out/', 'job_id': 3, 'output_prefix': 'out', 'merge_join': False}
+2022-05-10 18:59:36,672 done
+2022-05-10 18:59:36,673 task received
+2022-05-10 18:59:36,673 slippy=True
+2022-05-10 18:59:37,173 terminate
+2022-05-10 18:59:37,174 terminated

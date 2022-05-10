@@ -1,0 +1,62 @@
+2022-05-10 18:59:34,004 serve {'n_map': 6, 'n_reduce': 4, 'input_path': './files/inputs/testing/final', 'intermediate_path': './files/intermediate/', 'output_path': './files/out/', 'intermediate_prefix': 'mr', 'output_prefix': 'out', 'ignore_case': False, 'sort': False, 'wait_milliseconds': 500}
+2022-05-10 18:59:34,014 request received
+2022-05-10 18:59:34,015 status: INIT | worker_id: 3
+2022-05-10 18:59:34,015 map job 0 is assigned to worker 3
+2022-05-10 18:59:34,015 request received
+2022-05-10 18:59:34,015 status: INIT | worker_id: 1
+2022-05-10 18:59:34,015 request received
+2022-05-10 18:59:34,015 map job 1 is assigned to worker 1
+2022-05-10 18:59:34,015 status: INIT | worker_id: 2
+2022-05-10 18:59:34,016 map job 2 is assigned to worker 2
+2022-05-10 18:59:34,564 request received
+2022-05-10 18:59:34,564 status: SUCCESS | worker_id: 2
+2022-05-10 18:59:34,564 worker 2 completed job 2
+2022-05-10 18:59:34,564 map job 3 is assigned to worker 2
+2022-05-10 18:59:34,620 request received
+2022-05-10 18:59:34,620 status: SUCCESS | worker_id: 1
+2022-05-10 18:59:34,620 worker 1 completed job 1
+2022-05-10 18:59:34,620 map job 4 is assigned to worker 1
+2022-05-10 18:59:34,641 request received
+2022-05-10 18:59:34,641 status: SUCCESS | worker_id: 3
+2022-05-10 18:59:34,641 worker 3 completed job 0
+2022-05-10 18:59:34,641 map job 5 is assigned to worker 3
+2022-05-10 18:59:35,111 request received
+2022-05-10 18:59:35,111 status: SUCCESS | worker_id: 2
+2022-05-10 18:59:35,111 worker 2 completed job 3
+2022-05-10 18:59:35,111 idle wait task!
+2022-05-10 18:59:35,135 request received
+2022-05-10 18:59:35,135 status: SUCCESS | worker_id: 1
+2022-05-10 18:59:35,135 worker 1 completed job 4
+2022-05-10 18:59:35,135 idle wait task!
+2022-05-10 18:59:35,157 request received
+2022-05-10 18:59:35,157 status: SUCCESS | worker_id: 3
+2022-05-10 18:59:35,157 worker 3 completed job 5
+2022-05-10 18:59:35,157 map tasks are done
+2022-05-10 18:59:35,157 reduce job 0 is assigned to worker 3
+2022-05-10 18:59:35,699 request received
+2022-05-10 18:59:35,699 status: SUCCESS | worker_id: 3
+2022-05-10 18:59:35,699 worker 3 completed job 0
+2022-05-10 18:59:35,699 reduce job 1 is assigned to worker 3
+2022-05-10 18:59:36,114 request received
+2022-05-10 18:59:36,114 status: SUCCESS | worker_id: 2
+2022-05-10 18:59:36,114 reduce job 2 is assigned to worker 2
+2022-05-10 18:59:36,138 request received
+2022-05-10 18:59:36,138 status: SUCCESS | worker_id: 1
+2022-05-10 18:59:36,138 reduce job 3 is assigned to worker 1
+2022-05-10 18:59:36,242 request received
+2022-05-10 18:59:36,243 status: SUCCESS | worker_id: 3
+2022-05-10 18:59:36,243 worker 3 completed job 1
+2022-05-10 18:59:36,243 idle wait task!
+2022-05-10 18:59:36,644 request received
+2022-05-10 18:59:36,644 status: SUCCESS | worker_id: 2
+2022-05-10 18:59:36,644 worker 2 completed job 2
+2022-05-10 18:59:36,644 idle wait task!
+2022-05-10 18:59:36,672 request received
+2022-05-10 18:59:36,672 status: SUCCESS | worker_id: 1
+2022-05-10 18:59:36,672 worker 1 completed job 3
+2022-05-10 18:59:36,672 reduce tasks are done
+2022-05-10 18:59:37,245 request received
+2022-05-10 18:59:37,246 status: SUCCESS | worker_id: 3
+2022-05-10 18:59:37,647 request received
+2022-05-10 18:59:37,647 status: SUCCESS | worker_id: 2
+2022-05-10 18:59:37,647 self-terminate
