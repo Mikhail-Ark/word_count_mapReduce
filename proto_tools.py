@@ -1,10 +1,6 @@
 import wordcount_mr_pb2
 
 
-INPUT_PATH = "./files/inputs/"
-INTERMEDIATE_PATH = "./files/intermediate/"
-OUTPUT_PATH = "./files/out/"
-
 MAP_DEFAULT_IGNORE_CASE = False
 MAP_DEFAULT_N_BUCKETS = 1
 MAP_DEFAULT_SORT = False
@@ -30,22 +26,24 @@ def request_to_string(request):
     return " | ".join(request_list)
 
 
-def make_map_task(job_id, input_file_names, n_buckets):
+def make_map_task(
+    input_path, output_path, job_id, input_file_names, n_buckets
+):
     return wordcount_mr_pb2.Task(
         type=wordcount_mr_pb2.Task.MAP,
-        input_path=INPUT_PATH,
-        output_path=INTERMEDIATE_PATH,
+        input_path=input_path,
+        output_path=output_path,
         input_file_names=input_file_names,
         job_id=job_id,
         n_buckets=n_buckets
     )
 
 
-def make_reduce_task(job_id):
+def make_reduce_task(job_id, input_path, output_path):
     return wordcount_mr_pb2.Task(
         type=wordcount_mr_pb2.Task.REDUCE,
-        input_path=INTERMEDIATE_PATH,
-        output_path=OUTPUT_PATH,
+        input_path=input_path,
+        output_path=output_path,
         job_id=job_id
     )
 

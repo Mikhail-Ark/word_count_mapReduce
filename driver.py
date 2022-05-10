@@ -4,21 +4,34 @@ import grpc
 from itertools import cycle
 import logging
 from math import ceil
+from os import path
 from threading import Event
 
-from proto_tools import INPUT_PATH, make_map_task, make_reduce_task, \
-    make_wait_task, make_terminate_task, request_to_string, task_type_to_string
+from proto_tools import make_map_task, make_reduce_task, make_wait_task, \
+        make_terminate_task, request_to_string, task_type_to_string
 from tasks.io import find_files_for_task
 import wordcount_mr_pb2
 import wordcount_mr_pb2_grpc
 
+INPUT_PATH = "./files/inputs/"
+INTERMEDIATE_PATH = "./files/intermediate/"
+OUTPUT_PATH = "./files/out/"
+
 
 class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
-    def __init__(self, stop_event, n_map, n_reduce):
+    def __init__(
+        self, stop_event, n_map, n_reduce,
+        input_path=INPUT_PATH, intermediate_path=INTERMEDIATE_PATH,
+        output_path=OUTPUT_PATH
+    ):
         self.stop_event = stop_event
-        self.map_tasks = WordCountMR.prepare_map_tasks(n_map, n_reduce)
-        self.reduce_tasks = WordCountMR.prepare_reduce_tasks(n_reduce)
+        self.map_tasks = WordCountMR.prepare_map_tasks(
+            n_map, n_reduce, input_path, intermediate_path
+        )
+        self.reduce_tasks = WordCountMR.prepare_reduce_tasks(
+            n_reduce, intermediate_path, output_path
+        )
         self.workers = set()
         self.assignments = dict()
         self.complete_job_ids = set()
@@ -87,24 +100,37 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
 
     @staticmethod
-    def prepare_map_tasks(n_map, n_reduce):
-        file_names = find_files_for_task(INPUT_PATH, only_names=True)
-        files_for_map = WordCountMR.split_files_for_map(file_names, n_map)
+    def prepare_map_tasks(n_map, n_reduce, input_path, output_path):
+        file_names = find_files_for_task(input_path, only_names=True)
+        files_for_map = WordCountMR.split_files_for_map(
+            input_path, file_names, n_map
+        )
         return [
             make_map_task(
-                job_id, input_file_names, n_buckets=n_reduce
+                input_path, output_path, job_id, input_file_names, n_reduce
             ) for job_id, input_file_names in enumerate(files_for_map)
         ]
 
 
     @staticmethod
-    def prepare_reduce_tasks(n_reduce):
-        return [make_reduce_task(job_id) for job_id in range(n_reduce)]
+    def prepare_reduce_tasks(n_reduce, input_path, output_path):
+        return [
+            make_reduce_task(job_id, input_path, output_path)
+            for job_id in range(n_reduce)
+        ]
 
 
     @staticmethod
-    def split_files_for_map(file_names, n_map):
-        if len(file_names) <= n_map:
+    def split_files_for_map(input_path, file_names, n_map):
+        file_names.sort(
+            key=lambda file_name: path.getsize(input_path + file_name),
+            reverse=True
+        )
+        if len(file_names) == n_map:
+            return [[file_name] for file_name in file_names]
+        elif len(file_names) < n_map:
+            # TODO:
+            # file_names = divide_files(input_path, file_names, n_map)
             return [[file_name] for file_name in file_names]
         else:
             files_for_map = list()
