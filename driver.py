@@ -16,22 +16,32 @@ import wordcount_mr_pb2_grpc
 INPUT_PATH = "./files/inputs/"
 INTERMEDIATE_PATH = "./files/intermediate/"
 OUTPUT_PATH = "./files/out/"
+INTERMEDIATE_PREFIX = "mr"
+OUTPUT_PREFIX = "out"
+IGNORE_CASE = False
+SORT = False
+WAIT_MILLISECONDS = 500
 
 
 class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
 
     def __init__(
         self, stop_event, n_map, n_reduce,
-        input_path=INPUT_PATH, intermediate_path=INTERMEDIATE_PATH,
-        output_path=OUTPUT_PATH
+        input_path, intermediate_path, output_path,
+        intermediate_prefix, output_prefix,
+        ignore_case, sort, wait_milliseconds
     ):
+        self.input_path = input_path
+        self.intermediate_path = intermediate_path
+        self.output_path = output_path
         self.stop_event = stop_event
-        self.map_tasks = WordCountMR.prepare_map_tasks(
-            n_map, n_reduce, input_path, intermediate_path
-        )
-        self.reduce_tasks = WordCountMR.prepare_reduce_tasks(
-            n_reduce, intermediate_path, output_path
-        )
+        self.intermediate_prefix = intermediate_prefix
+        self.output_prefix = output_prefix
+        self.ignore_case = ignore_case
+        self.sort = sort
+        self.wait_milliseconds = wait_milliseconds
+        self.map_tasks = self.prepare_map_tasks(n_map, n_reduce)
+        self.reduce_tasks = self.prepare_reduce_tasks(n_reduce)
         self.workers = set()
         self.assignments = dict()
         self.complete_job_ids = set()
@@ -55,14 +65,14 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
             wordcount_mr_pb2.Task.MAP, wordcount_mr_pb2.Task.REDUCE
         }:
             self.assignments[worker_id] = task.job_id
-            logging.info(f"{task_type_to_string(task.type)} job {task.job_id} assigned to worker {worker_id}")
+            logging.info(f"{task_type_to_string(task.type)} job {task.job_id} is assigned to worker {worker_id}")
         elif task.type == wordcount_mr_pb2.Task.TERMINATE:
             if worker_id in self.workers:
                 self.workers.remove(worker_id)
                 if not self.workers:
                     self.stop_event.set()
         elif task.type == wordcount_mr_pb2.Task.WAIT:
-            logging.info("idle wait!")
+            logging.info("idle wait task!")
         return task
 
 
@@ -80,7 +90,7 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
         self.complete_job_ids.clear()
         self.assignments.clear()
         tasks_cycled = cycle(tasks)
-        task_wait = make_wait_task()
+        task_wait = make_wait_task(WAIT_MILLISECONDS)
         while True:
             if len(self.complete_job_ids) == len(tasks):
                 break
@@ -98,23 +108,26 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
                         break
 
 
-    @staticmethod
-    def prepare_map_tasks(n_map, n_reduce, input_path, output_path):
-        file_names = find_files_for_task(input_path, only_names=True)
-        files_for_map = WordCountMR.split_files_for_map(
-            input_path, file_names, n_map
+    def prepare_map_tasks(self, n_map, n_reduce):
+        file_names = find_files_for_task(self.input_path, only_names=True)
+        files_for_map = self.split_files_for_map(
+            self.input_path, file_names, n_map
         )
         return [
             make_map_task(
-                input_path, output_path, job_id, input_file_names, n_reduce
+                self.input_path, self.intermediate_path,
+                job_id, input_file_names, n_reduce,
+                self.intermediate_prefix, self.ignore_case, self.sort
             ) for job_id, input_file_names in enumerate(files_for_map)
         ]
 
 
-    @staticmethod
-    def prepare_reduce_tasks(n_reduce, input_path, output_path):
+    def prepare_reduce_tasks(self, n_reduce):
         return [
-            make_reduce_task(job_id, input_path, output_path)
+            make_reduce_task(
+                job_id, self.intermediate_path, self.output_path,
+                self.output_prefix, self.sort
+            )
             for job_id in range(n_reduce)
         ]
 
@@ -147,12 +160,13 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
             return files_for_map
 
 
-def serve(n_map, n_reduce):
-    logging.info(f"serve n_map={n_map}, n_reduce={n_reduce}")
+def serve(**kwargs):
+    logging.info(f"serve {kwargs}")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     stop_event = Event()
+    kwargs["stop_event"] = stop_event
     wordcount_mr_pb2_grpc.add_WordCountMRServicer_to_server(
-        WordCountMR(stop_event, n_map, n_reduce), server
+        WordCountMR(**kwargs), server
     )
     server.add_insecure_port("[::]:50051")
     server.start()
@@ -172,9 +186,48 @@ if __name__ == "__main__":
         "--n_reduce", "-M", type=int, nargs="?", const=1, default=1,
         help="number of reduce tasks"
     )
+    parser.add_argument(
+        "--input_path", type=str, nargs="?", const=INPUT_PATH,
+        default=INPUT_PATH, help="path to dir with input files"
+    )
+    parser.add_argument(
+        "--intermediate_path", type=str, nargs="?", const=INTERMEDIATE_PATH,
+        default=INTERMEDIATE_PATH, help="path to dir for intermediate files"
+    )
+    parser.add_argument(
+        "--output_path", type=str, nargs="?", const=OUTPUT_PATH,
+        default=OUTPUT_PATH, help="path to dir for output files"
+    )
+    parser.add_argument(
+        "--intermediate_prefix", type=str, nargs="?", const=INTERMEDIATE_PATH,
+        default=INTERMEDIATE_PREFIX, help="prefix for intermediate files"
+    )
+    parser.add_argument(
+        "--output_prefix", type=str, nargs="?", const=OUTPUT_PATH,
+        default=OUTPUT_PREFIX, help="prefix for output files"
+    )
+    parser.add_argument(
+        "--ignore_case", "-c", action="store_true",
+        default=False, help="ignore case in all tasks"
+    )
+    parser.add_argument(
+        "--sort", "-s", action="store_true",
+        default=False, help="add sort between map and reduce"
+    )
+    parser.add_argument(
+        "--wait", "-w", type=int, nargs="?",
+        const=WAIT_MILLISECONDS, default=WAIT_MILLISECONDS,
+        help="time for wait tasks in milliseconds"
+    )
     args = parser.parse_args()
     logging.basicConfig(
         filename="./logs/driver.log", level=logging.DEBUG,
         format="%(asctime)s %(message)s", filemode="w"
     )
-    serve(n_map=args.n_map, n_reduce=args.n_reduce)
+    serve(
+        n_map=args.n_map, n_reduce=args.n_reduce, input_path=args.input_path,
+        intermediate_path=args.intermediate_path, output_path=args.output_path,
+        intermediate_prefix=args.intermediate_prefix,
+        output_prefix=args.output_prefix, ignore_case=args.ignore_case,
+        sort=args.sort, wait_milliseconds=args.wait
+    )
