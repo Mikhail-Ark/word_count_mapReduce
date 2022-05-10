@@ -14,6 +14,7 @@ A driver creates tasks at the time of startup according to the specified paramet
 
 `./wcmr.sh ./files/inputs/testing/final 6 4 3`
 > `./files/inputs/testing/final` path to an input dir
+>
 >`6` number of map tasks (N)
 >
 >`4` number of reduce tasks (M)
