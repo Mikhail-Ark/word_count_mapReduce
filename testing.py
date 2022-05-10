@@ -662,4 +662,5 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
 
 
 if __name__ == "__main__":
+    print("up to 20 sec")
     main()
