@@ -4,7 +4,7 @@ from tasks.io import find_files_for_task, make_text_generator, write_output
 
 
 def word_count_map(
-    input_path, output_path, input_file_names=None, output_file_name="mr",
+    input_path, output_path, input_file_names=None, output_prefix="mr",
     job_id=0, n_buckets=1, ignore_case=False, sort=False
 ):
     files_for_task = find_files_for_task(input_path, input_file_names)
@@ -13,7 +13,7 @@ def word_count_map(
     if sort:
         tokenized_text = sorted(tokenized_text)
     write_output(
-        tokenized_text, f"{output_path}{output_file_name}-{job_id}", n_buckets
+        tokenized_text, f"{output_path}{output_prefix}-{job_id}", n_buckets
     )
 
 
