@@ -9,8 +9,9 @@ from tasks.reduce import word_count_reduce
 import wordcount_mr_pb2
 import wordcount_mr_pb2_grpc
 
+WAIT_MILLISECONDS = 500
 
-def run(worker_id):
+def run(worker_id, sleepy):
     logging.info(f"run worker_id {worker_id}")
     task_request = make_init_task_request(worker_id)
     with grpc.insecure_channel("localhost:50051") as channel:
@@ -20,9 +21,12 @@ def run(worker_id):
             try:
                 task = stub.GetTask(task_request)
                 logging.info("task received")
+                if sleepy:
+                    logging.info("slippy=True")
+                    sleep(WAIT_MILLISECONDS / 1000)
             except grpc._channel._InactiveRpcError:
                 logging.info("no server, wait")
-                task = make_wait_task()
+                task = make_wait_task(WAIT_MILLISECONDS)
             terminate = do_task(task, task_request)
     logging.info("terminated")
 
@@ -53,9 +57,13 @@ if __name__ == "__main__":
         "--worker_id", "-i", type=int, nargs="?", const=1, default=1,
         help="worker id"
     )
+    parser.add_argument(
+        "--sleepy", "-s", action="store_true",
+        default=False, help="add sleep to received tasks"
+    )
     args = parser.parse_args()
     logging.basicConfig(
         filename=f"./logs/worker_{args.worker_id}.log", level=logging.DEBUG,
         format="%(asctime)s %(message)s", filemode="w"
     )
-    run(args.worker_id)
+    run(args.worker_id, args.sleepy)
