@@ -40,6 +40,7 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
         self.ignore_case = ignore_case
         self.sort = sort
         self.wait_milliseconds = wait_milliseconds
+        self.ensure_proper_paths()
         self.map_tasks = self.prepare_map_tasks(n_map, n_reduce)
         self.reduce_tasks = self.prepare_reduce_tasks(n_reduce)
         self.workers = set()
@@ -130,6 +131,12 @@ class WordCountMR(wordcount_mr_pb2_grpc.WordCountMRServicer):
             )
             for job_id in range(n_reduce)
         ]
+
+
+    def ensure_proper_paths(self):
+        for path in ("input_path", "intermediate_path", "output_path"):
+            if not getattr(self, path).endswith("/"):
+                setattr(self, path, getattr(self, path) + "/")
 
 
     @staticmethod
