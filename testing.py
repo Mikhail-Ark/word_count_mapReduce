@@ -9,8 +9,10 @@ INPUT_PATH = "./files/inputs/testing/"
 INTERMEDIATE_PATH = "./files/intermediate/testing/"
 OUTPUT_PATH = "./files/out/testing/"
 INPUT_PATH_FINAL = INPUT_PATH + "final/"
+INTERMEDIATE_PATH_FINAL = INTERMEDIATE_PATH + "final/"
 
 TESTING_PREFIX = "_test"
+LOGS_PATH = "./logs/"
 
 
 class TestMethodsSimple(TestCase):
@@ -135,6 +137,7 @@ class TestMethodsOutputFiles(TestCase):
     def clear_dirs():
         paths = [
             INTERMEDIATE_PATH,
+            INTERMEDIATE_PATH_FINAL,
             OUTPUT_PATH
         ]
         for path in paths:
@@ -515,13 +518,15 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
         self.assertTrue("algernon 272" in res)
 
 
-    def test_integration_single_worker(self):
+    def test_integration_single_worker_driver_waits(self):
         N = 6
         M = 4
-        command = f"python driver.py -N {N} -M {M} --input_path {INPUT_PATH_FINAL} --intermediate_path {INTERMEDIATE_PATH} --output_path {OUTPUT_PATH} --intermediate_prefix {TESTING_PREFIX}  --output_prefix {TESTING_PREFIX} & sleep 1; python worker.py"
+        driver_call = f"python driver.py -N {N} -M {M} --input_path {INPUT_PATH_FINAL} --intermediate_path {INTERMEDIATE_PATH_FINAL} --output_path {OUTPUT_PATH} --intermediate_prefix {TESTING_PREFIX}  --output_prefix {TESTING_PREFIX}"
+        worker_call = "python worker.py"
+        command = driver_call + " & sleep 1; " + worker_call
         system(command)
         intermediate_files = [
-            f"{INTERMEDIATE_PATH}{TESTING_PREFIX}-{n}-{m}" \
+            f"{INTERMEDIATE_PATH_FINAL}{TESTING_PREFIX}-{n}-{m}" \
             for n in range(N) for m in range(M)
         ]
         output_files = [f"{OUTPUT_PATH}{TESTING_PREFIX}-{m}" for m in range(M)]
@@ -532,11 +537,128 @@ to 2\ntry 1\nuncertainty 1\nusually 1\nvery 2\nwhy 1\n"""
             with open(file_path, "r") as file:
                 contents = file.read().split("\n")
             res.update(set(contents))
-        self.assertEqual(len(res), 24777)
+        self.assertEqual(len(res), 22719)
         self.assertTrue("responsibility 5" in res)
-        self.assertTrue("spoke 106" in res)
+        self.assertTrue("spoke 104" in res)
         self.assertTrue("husky 4" in res)
-        self.assertTrue("go 974" in res)
+        self.assertTrue("go 945" in res)
+
+
+    def test_integration_single_worker_waits(self):
+        N = 6
+        M = 4
+        driver_call = f"python driver.py -N {N} -M {M} --input_path {INPUT_PATH_FINAL} --intermediate_path {INTERMEDIATE_PATH_FINAL} --output_path {OUTPUT_PATH} --intermediate_prefix {TESTING_PREFIX}  --output_prefix {TESTING_PREFIX}"
+        worker_call = "python worker.py & sleep 1"
+        command = worker_call + "; " + driver_call
+        system(command)
+        intermediate_files = [
+            f"{INTERMEDIATE_PATH_FINAL}{TESTING_PREFIX}-{n}-{m}" \
+            for n in range(N) for m in range(M)
+        ]
+        output_files = [f"{OUTPUT_PATH}{TESTING_PREFIX}-{m}" for m in range(M)]
+        res = set()
+        for file_path in intermediate_files + output_files:
+            self.assertFalse(is_dir_or_empty_file(file_path))
+        for file_path in output_files:
+            with open(file_path, "r") as file:
+                contents = file.read().split("\n")
+            res.update(set(contents))
+        self.assertEqual(len(res), 22719)
+        self.assertTrue("responsibility 5" in res)
+        self.assertTrue("spoke 104" in res)
+        self.assertTrue("husky 4" in res)
+        self.assertTrue("go 945" in res)
+
+
+    def test_integration_multiple_workers(self):
+        N = 6
+        M = 4
+        n_workers = 3
+        driver_call = f"python driver.py -N {N} -M {M} --input_path {INPUT_PATH_FINAL} --intermediate_path {INTERMEDIATE_PATH_FINAL} --output_path {OUTPUT_PATH} --intermediate_prefix {TESTING_PREFIX}  --output_prefix {TESTING_PREFIX}"
+        worker_call = " & ".join(
+            [f"python worker.py -i {i + 1} -s" for i in range(n_workers)]
+        )
+        command =  driver_call + " & sleep 0.01; " + worker_call
+        system(command)
+        intermediate_files = [
+            f"{INTERMEDIATE_PATH_FINAL}{TESTING_PREFIX}-{n}-{m}" \
+            for n in range(N) for m in range(M)
+        ]
+        output_files = [f"{OUTPUT_PATH}{TESTING_PREFIX}-{m}" for m in range(M)]
+        res = set()
+        for file_path in intermediate_files + output_files:
+            self.assertFalse(is_dir_or_empty_file(file_path))
+        for file_path in output_files:
+            with open(file_path, "r") as file:
+                contents = file.read().split("\n")
+            res.update(set(contents))
+        self.assertEqual(len(res), 22719)
+        self.assertTrue("responsibility 5" in res)
+        self.assertTrue("spoke 104" in res)
+        self.assertTrue("husky 4" in res)
+        self.assertTrue("go 945" in res)
+        for i in range(1, n_workers + 1):
+            with open(f"{LOGS_PATH}worker_{i}.log", "r") as log_file:
+                self.assertTrue(
+                    any(
+                        ("task received" in line for line in log_file.readlines())
+                    )
+                )
+
+
+    def test_integration_sort(self):
+        N = 6
+        M = 4
+        driver_call = f"python driver.py -N {N} -M {M} --input_path {INPUT_PATH_FINAL} --intermediate_path {INTERMEDIATE_PATH_FINAL} --output_path {OUTPUT_PATH} --intermediate_prefix {TESTING_PREFIX}  --output_prefix {TESTING_PREFIX} --sort"
+        worker_call = "python worker.py"
+        command = driver_call + " & sleep 0.01; " + worker_call
+        system(command)
+        intermediate_files = [
+            f"{INTERMEDIATE_PATH_FINAL}{TESTING_PREFIX}-{n}-{m}" \
+            for n in range(N) for m in range(M)
+        ]
+        output_files = [f"{OUTPUT_PATH}{TESTING_PREFIX}-{m}" for m in range(M)]
+        res = set()
+        for file_path in intermediate_files + output_files:
+            self.assertFalse(is_dir_or_empty_file(file_path))
+        for file_path in output_files:
+            with open(file_path, "r") as file:
+                contents = file.read().split("\n")
+            res.update(set(contents))
+            self.assertEqual(contents[:-1], sorted(contents[:-1]))
+
+        self.assertEqual(len(res), 22719)
+        self.assertTrue("responsibility 5" in res)
+        self.assertTrue("spoke 104" in res)
+        self.assertTrue("husky 4" in res)
+        self.assertTrue("go 945" in res)
+
+
+    def test_integration_ignore_case(self):
+        N = 6
+        M = 4
+        driver_call = f"python driver.py -N {N} -M {M} --input_path {INPUT_PATH_FINAL} --intermediate_path {INTERMEDIATE_PATH_FINAL} --output_path {OUTPUT_PATH} --intermediate_prefix {TESTING_PREFIX}  --output_prefix {TESTING_PREFIX} --ignore_case"
+        worker_call = "python worker.py"
+        command = driver_call + " & sleep 0.01; " + worker_call
+        system(command)
+        intermediate_files = [
+            f"{INTERMEDIATE_PATH_FINAL}{TESTING_PREFIX}-{n}-{m}" \
+            for n in range(N) for m in range(M)
+        ]
+        output_files = [f"{OUTPUT_PATH}{TESTING_PREFIX}-{m}" for m in range(M)]
+        res = set()
+        for file_path in intermediate_files + output_files:
+            self.assertFalse(is_dir_or_empty_file(file_path))
+        for file_path in output_files:
+            with open(file_path, "r") as file:
+                contents = file.read()
+                self.assertFalse(any([c.isupper() for c in contents]))
+            res.update(set(contents.split("\n")))
+        self.assertEqual(len(res), 20020)
+        self.assertTrue("responsibility 5" in res)
+        self.assertTrue("spoke 104" in res)
+        self.assertTrue("husky 4" in res)
+        self.assertTrue("go 992" in res)
 
 
 if __name__ == "__main__":
