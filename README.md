@@ -60,7 +60,7 @@ A driver creates tasks at the time of startup according to the specified paramet
 
 #### Future work
 
-Thanks to the extra time, I was able to complete the task completely.
+Thanks to the extra time, I was able to complete the task.
 There are many ways to improve the program, some of them are listed below.
 
 - Improve the split of files into map tasks. The current split scheme does not take into account the size of files, as well as the situation in which the number of incoming files is less than the number of jobs/workers. To evenly distribute the load, we can divide large files into parts. For more efficient execution, we do not even want to equalize tasks, but to minimize an idleness of workers at the time of transition from the map stage to the reduce stage.In this case, we can write a combinatorial-heuristic or linearly optimising algorithm that will distribute the pieces of files so that the workers finish the task at the same time. If desired, we can even take into account the statistics of the speed of execution of tasks by different workers.
