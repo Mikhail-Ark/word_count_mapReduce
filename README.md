@@ -1,5 +1,7 @@
 An example of solving a test task.
 
+The task is in the file map-reduce-task.pdf
+
 #### Brief design description
 
 Distributed mapReduce program to solve word count problem.
