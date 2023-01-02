@@ -1,8 +1,4 @@
-
-Hello benshi.ai team,
-
-Thank you for this opportunity! I will be glad to tell you about the advantages
-of my implementation on a review, as well as to get any feedback.
+An example of solving a test task.
 
 #### Brief design description
 
@@ -73,3 +69,7 @@ There are many ways to improve the program, some of them are listed below.
 - Implement and add flag for map tasks to produce aggregated reduce-like output. Although the task directly says not to implement this feature, it increases the effectiveness of the classic mapReduce, and also helps in extreme cases, such as a large number of identical repeated words at the input.
 - Add caching. In general, the data indirectly tells us that tasks can be repeatative. If this is the case, then depending on the completeness of the repetition, it may be reasonable to add caching at the input to the driver (if the dataset is completely repeated) or at the preparation of map tasks (if part of the dataset is repeated, or there are duplicate files in the set itself). The cache for the reduce does not make sense, because if at least one file is not in the map cache, then the reduce will have to be recalculated, elif all the files are in the cache, then the cache of the reduce will appear only if the program itself was called with these parameters, and the answer will be in the driver cache. Given the relatively short execution time of the task, the cache may seem meaningless. The reasonability depends on the data. In addition, as the complexity of tokenization increases, resource consumption may increase significantly, especially when it comes to fusional languages like Spanish or Russian. + Note: When writing a cache, it is necessary to take into account the parameters with which it was received.
 - A significant upgrade will be an improvement in fault tolerance with better error and crashes handling. In the current code, the worker's possible crushes are only partially processed. In addition, there is a problem that if the worker for some reason has never managed to get a task, then the driver may terminate before sending the worker a signal for termination.
+
+#### Reviewers' comments:
+- Dividing a file into parts can be made easier by passing the path to the file and an offset.
+- Too intensive testing, does not look like a real production project.
